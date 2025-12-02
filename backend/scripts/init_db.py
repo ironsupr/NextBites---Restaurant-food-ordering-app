@@ -9,15 +9,70 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import Session
+from app.core.config import settings
 from app.db.database import engine, SessionLocal
 from app.models import Base, User, Restaurant, MenuItem
 from app.models.user import UserRole
-from sqlalchemy.orm import Session
+
+
+def create_database_if_not_exists():
+    """Create the database if it doesn't exist."""
+    from sqlalchemy_utils import database_exists, create_database
+    
+    try:
+        # Try using sqlalchemy_utils
+        if not database_exists(settings.DATABASE_URL):
+            print(f"Database does not exist. Creating database...")
+            create_database(settings.DATABASE_URL)
+            print("✓ Database created successfully")
+        else:
+            print("✓ Database already exists")
+    except ImportError:
+        # Fallback: manual creation using postgres connection
+        print("sqlalchemy_utils not found, using manual database creation...")
+        
+        # Extract database name from URL
+        from urllib.parse import urlparse
+        parsed = urlparse(settings.DATABASE_URL)
+        database_name = parsed.path.lstrip('/')
+        
+        # Create connection to 'postgres' database
+        postgres_url = settings.DATABASE_URL.replace(f'/{database_name}', '/postgres')
+        
+        try:
+            temp_engine = create_engine(postgres_url, isolation_level='AUTOCOMMIT')
+            with temp_engine.connect() as conn:
+                # Check if database exists
+                result = conn.execute(
+                    text(f"SELECT 1 FROM pg_database WHERE datname = '{database_name}'")
+                )
+                exists = result.fetchone() is not None
+                
+                if not exists:
+                    print(f"Creating database '{database_name}'...")
+                    conn.execute(text(f'CREATE DATABASE "{database_name}"'))
+                    print("✓ Database created successfully")
+                else:
+                    print("✓ Database already exists")
+            
+            temp_engine.dispose()
+        except Exception as e:
+            print(f"Warning: Could not auto-create database: {str(e)}")
+            print(f"Please create database '{database_name}' manually using:")
+            print(f"  createdb {database_name}")
+            print("Or using SQL:")
+            print(f"  CREATE DATABASE {database_name};")
+            raise
 
 
 def init_db():
-    """Create all database tables."""
-    print("Creating database tables...")
+    """Create database and all tables."""
+    # Create database if it doesn't exist
+    create_database_if_not_exists()
+    
+    print("\nCreating database tables...")
     Base.metadata.create_all(bind=engine)
     print("✓ Tables created successfully")
 

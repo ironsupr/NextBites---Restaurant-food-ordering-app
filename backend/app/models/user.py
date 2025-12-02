@@ -3,9 +3,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 import enum
 from app.db.database import Base
-from passlib.context import CryptContext
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+import bcrypt
 
 
 class UserRole(str, enum.Enum):
@@ -34,12 +32,25 @@ class User(Base):
 
     @staticmethod
     def hash_password(password: str) -> str:
-        """Hash a password."""
-        return pwd_context.hash(password)
+        """Hash a password using bcrypt."""
+        # Convert password to bytes if it's a string
+        if isinstance(password, str):
+            password = password.encode('utf-8')
+        # Generate salt and hash password
+        salt = bcrypt.gensalt()
+        hashed = bcrypt.hashpw(password, salt)
+        return hashed.decode('utf-8')
 
     def verify_password(self, password: str) -> bool:
         """Verify a password against the hash."""
-        return pwd_context.verify(password, self.password_hash)
+        # Convert password to bytes if it's a string
+        if isinstance(password, str):
+            password = password.encode('utf-8')
+        # Convert stored hash to bytes if it's a string
+        stored_hash = self.password_hash
+        if isinstance(stored_hash, str):
+            stored_hash = stored_hash.encode('utf-8')
+        return bcrypt.checkpw(password, stored_hash)
 
     def __repr__(self):
         return f"<User {self.email} ({self.role.value})>"
