@@ -18,7 +18,13 @@ class PaymentMethodResponse(BaseModel):
     last4: str
     brand: str
     is_default: bool
-    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+class SetupIntentResponse(BaseModel):
+    client_secret: str
     
     class Config:
         from_attributes = True
