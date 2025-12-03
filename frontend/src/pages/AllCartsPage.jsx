@@ -1,0 +1,214 @@
+import React, { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import api from '../utils/api';
+import Button from '../components/Button';
+import { ShoppingCart, CreditCard, User, MapPin } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+
+const AllCartsPage = () => {
+    const navigate = useNavigate();
+    const { user } = useAuth();
+    const [selectedCart, setSelectedCart] = useState(null);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+    // Only admins and managers can access this page
+    if (user?.role === 'team_member') {
+        return (
+            <div className="text-center py-16">
+                <h2 className="text-2xl font-bold text-secondary mb-2">Access Denied</h2>
+                <p className="text-gray-500">Only admins and managers can view all carts.</p>
+            </div>
+        );
+    }
+
+    // Fetch all carts
+    const { data: carts = [], isLoading, refetch } = useQuery({
+        queryKey: ['allCarts'],
+        queryFn: async () => {
+            const response = await api.get('/orders/all-carts');
+            return response.data;
+        }
+    });
+
+    // Fetch users for display
+    const { data: users = [] } = useQuery({
+        queryKey: ['users'],
+        queryFn: async () => {
+            try {
+                const response = await api.get('/users/');
+                return response.data;
+            } catch {
+                return [];
+            }
+        }
+    });
+
+    // Fetch payment methods for selected cart's user
+    const { data: paymentMethods = [] } = useQuery({
+        queryKey: ['paymentMethods', selectedCart?.user_id],
+        queryFn: async () => {
+            if (!selectedCart) return [];
+            const response = await api.get(`/payment-methods/?user_id=${selectedCart.user_id}`);
+            return response.data;
+        },
+        enabled: !!selectedCart
+    });
+
+    // Checkout mutation
+    const checkoutMutation = useMutation({
+        mutationFn: async ({ orderId, paymentMethodId }) => {
+            const response = await api.post(`/orders/${orderId}/checkout`, {
+                payment_method_id: paymentMethodId
+            });
+            return response.data;
+        },
+        onSuccess: () => {
+            alert('Order checked out successfully!');
+            setShowPaymentModal(false);
+            setSelectedCart(null);
+            refetch();
+        },
+        onError: (error) => {
+            alert(`Checkout failed: ${error.response?.data?.detail || error.message}`);
+        }
+    });
+
+    const getUserName = (userId) => {
+        const u = users.find(u => u.id === userId);
+        return u ? u.full_name || u.email : `User #${userId}`;
+    };
+
+    const handleCheckout = (cart) => {
+        setSelectedCart(cart);
+        setShowPaymentModal(true);
+    };
+
+    const handleConfirmCheckout = (paymentMethodId) => {
+        checkoutMutation.mutate({
+            orderId: selectedCart.id,
+            paymentMethodId: paymentMethodId
+        });
+    };
+
+    if (isLoading) {
+        return (
+            <div className="flex justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="max-w-6xl mx-auto">
+            <h1 className="text-3xl font-bold text-secondary mb-8">All User Carts</h1>
+
+            {carts.length === 0 ? (
+                <div className="text-center py-16 bg-gray-50 rounded-xl">
+                    <ShoppingCart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h2 className="text-xl font-semibold text-secondary mb-2">No active carts</h2>
+                    <p className="text-gray-500">No users currently have items in their cart.</p>
+                </div>
+            ) : (
+                <div className="grid gap-6">
+                    {carts.map((cart) => (
+                        <div key={cart.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                            <div className="p-6">
+                                {/* Cart Header */}
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
+                                            <User className="h-5 w-5 text-primary" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-semibold text-secondary">{getUserName(cart.user_id)}</h3>
+                                            <p className="text-sm text-gray-500">Cart #{cart.id} • Restaurant #{cart.restaurant_id}</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-2xl font-bold text-primary">${cart.total_amount?.toFixed(2) || '0.00'}</p>
+                                        <p className="text-sm text-gray-500">{cart.order_items?.length || 0} items</p>
+                                    </div>
+                                </div>
+
+                                {/* Cart Items */}
+                                <div className="border-t border-gray-100 pt-4 mb-4">
+                                    <div className="space-y-2">
+                                        {cart.order_items?.map((item) => (
+                                            <div key={item.id} className="flex justify-between text-sm">
+                                                <span className="text-gray-600">
+                                                    {item.menu_item_name || `Item #${item.menu_item_id}`} x{item.quantity}
+                                                </span>
+                                                <span className="text-gray-900">${(item.price_at_time * item.quantity).toFixed(2)}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Actions */}
+                                <div className="flex justify-end">
+                                    <Button onClick={() => handleCheckout(cart)} className="flex items-center gap-2">
+                                        <CreditCard className="h-4 w-4" />
+                                        Checkout for User
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* Payment Method Modal */}
+            {showPaymentModal && selectedCart && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+                        <h2 className="text-xl font-bold text-secondary mb-4">Select Payment Method</h2>
+                        <p className="text-gray-500 mb-4">
+                            Checking out cart for {getUserName(selectedCart.user_id)}
+                        </p>
+
+                        {paymentMethods.length === 0 ? (
+                            <div className="text-center py-8 bg-gray-50 rounded-lg mb-4">
+                                <CreditCard className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                                <p className="text-gray-500">No payment methods found for this user.</p>
+                                <p className="text-sm text-gray-400 mt-1">Add a payment method first.</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-2 mb-4">
+                                {paymentMethods.map((pm) => (
+                                    <button
+                                        key={pm.id}
+                                        onClick={() => handleConfirmCheckout(pm.id)}
+                                        disabled={checkoutMutation.isPending}
+                                        className="w-full p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-primary/5 transition-colors text-left flex items-center gap-3"
+                                    >
+                                        <CreditCard className="h-5 w-5 text-gray-400" />
+                                        <div>
+                                            <p className="font-medium text-secondary">{pm.brand} •••• {pm.last4}</p>
+                                            {pm.is_default && <span className="text-xs text-primary">Default</span>}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        <div className="flex gap-3">
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    setShowPaymentModal(false);
+                                    setSelectedCart(null);
+                                }}
+                                className="flex-1"
+                            >
+                                Cancel
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default AllCartsPage;

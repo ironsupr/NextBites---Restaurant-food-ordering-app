@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { ShoppingBag, ShoppingCart, Menu, X, LogOut, User, Shield } from 'lucide-react';
+import { ShoppingBag, ShoppingCart, Menu, X, LogOut, User, Shield, Users } from 'lucide-react';
 import Button from './Button';
 import { cn } from '../utils/cn';
 
@@ -20,6 +20,7 @@ const Navbar = () => {
         { name: 'Restaurants', path: '/restaurants', show: true },
         { name: 'Cart', path: '/cart', show: !!user, icon: ShoppingCart },
         { name: 'My Orders', path: '/orders', show: !!user },
+        { name: 'All Carts', path: '/admin/carts', show: hasPermission('checkout') },
         { name: 'Users', path: '/admin/users', show: hasPermission('manage_users') },
         { name: 'Payments', path: '/admin/payments', show: hasPermission('update_payment') },
     ];

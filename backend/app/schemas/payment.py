@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 from datetime import datetime
 
 
@@ -7,6 +8,7 @@ class PaymentMethodCreate(BaseModel):
     last4: str
     brand: str
     is_default: bool = False
+    user_id: Optional[int] = None  # Admin can specify user_id
 
 
 class PaymentMethodResponse(BaseModel):

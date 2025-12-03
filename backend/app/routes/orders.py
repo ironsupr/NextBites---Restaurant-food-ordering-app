@@ -112,6 +112,51 @@ async def get_user_orders(
     return order_responses
 
 
+@router.get("/all-carts", response_model=List[OrderResponse])
+async def get_all_carts(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Get all users' carts - ADMIN and MANAGER only."""
+    if current_user.role not in [UserRole.ADMIN, UserRole.MANAGER]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only admins and managers can view all carts"
+        )
+    
+    # Get all cart orders
+    orders = db.query(Order).filter(Order.status == OrderStatus.CART).all()
+    
+    # Convert to responses with order items
+    order_responses = []
+    for order in orders:
+        order_items = []
+        for item in order.order_items:
+            menu_item = db.query(MenuItem).filter(MenuItem.id == item.menu_item_id).first()
+            order_item_response = OrderItemResponse(
+                id=item.id,
+                menu_item_id=item.menu_item_id,
+                quantity=item.quantity,
+                price_at_time=item.price_at_time,
+                menu_item_name=menu_item.name if menu_item else None
+            )
+            order_items.append(order_item_response)
+        
+        order_response = OrderResponse(
+            id=order.id,
+            user_id=order.user_id,
+            restaurant_id=order.restaurant_id,
+            status=order.status,
+            total_amount=order.total_amount,
+            created_at=order.created_at,
+            updated_at=order.updated_at,
+            order_items=order_items
+        )
+        order_responses.append(order_response)
+    
+    return order_responses
+
+
 @router.get("/{order_id}", response_model=OrderResponse)
 async def get_order(
     order_id: int,
@@ -309,11 +354,13 @@ async def checkout_order(
             detail="Order not found"
         )
     
+    # Admin and Manager can checkout any order, others only their own
     if order.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You can only checkout your own orders"
-        )
+        if current_user.role not in [UserRole.ADMIN, UserRole.MANAGER]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You can only checkout your own orders"
+            )
     
     if order.status != OrderStatus.CART:
         raise HTTPException(
@@ -327,17 +374,17 @@ async def checkout_order(
             detail="Cannot checkout empty cart"
         )
     
-    # Get payment method
+    # Get payment method - admin/manager can use any user's payment method for their order
     from app.models.payment_method import PaymentMethod
     payment_method = db.query(PaymentMethod).filter(
         PaymentMethod.id == checkout_data.payment_method_id,
-        PaymentMethod.user_id == current_user.id
+        PaymentMethod.user_id == order.user_id  # Use order owner's payment method
     ).first()
     
     if not payment_method:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Payment method not found"
+            detail="Payment method not found for order owner"
         )
     
     # Calculate total

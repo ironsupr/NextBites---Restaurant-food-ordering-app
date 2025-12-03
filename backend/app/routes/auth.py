@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.models.user import User
+from app.models.payment_method import PaymentMethod
 from app.schemas.user import UserCreate, UserResponse, LoginRequest, TokenResponse
 from app.core.security import create_access_token, blacklist_token
 from app.middleware.auth import get_current_active_user
@@ -9,6 +10,19 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 security = HTTPBearer()
+
+
+def create_default_payment_method(db: Session, user_id: int):
+    """Create default Cash payment method for a user."""
+    cash_method = PaymentMethod(
+        user_id=user_id,
+        stripe_payment_method_id=f"cash_{user_id}",
+        last4="CASH",
+        brand="Cash",
+        is_default=True
+    )
+    db.add(cash_method)
+    db.commit()
 
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
@@ -33,6 +47,9 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+    
+    # Create default Cash payment method for new user
+    create_default_payment_method(db, new_user.id)
     
     # Create access token (sub should be string per JWT spec)
     access_token = create_access_token(data={"sub": str(new_user.id)})

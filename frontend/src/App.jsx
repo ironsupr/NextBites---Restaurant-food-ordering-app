@@ -12,6 +12,7 @@ import OrdersPage from './pages/OrdersPage';
 import CheckoutPage from './pages/CheckoutPage';
 import UserManagementPage from './pages/UserManagementPage';
 import PaymentMethodsPage from './pages/PaymentMethodsPage';
+import AllCartsPage from './pages/AllCartsPage';
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,10 @@ function App() {
                                 <Route path="/orders" element={<OrdersPage />} />
                                 <Route path="/cart" element={<CartPage />} />
                                 <Route path="/checkout/:orderId" element={<CheckoutPage />} />
+                            </Route>
+
+                            <Route element={<ProtectedRoute requiredPermission="checkout" />}>
+                                <Route path="/admin/carts" element={<AllCartsPage />} />
                             </Route>
 
                             <Route element={<ProtectedRoute requiredPermission="manage_users" />}>
