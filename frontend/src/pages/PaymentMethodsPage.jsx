@@ -92,7 +92,7 @@ const PaymentMethodsPage = () => {
     return (
         <div className="max-w-4xl mx-auto">
             <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold text-secondary">Payment Methods</h1>
+                <h1 className="text-3xl font-bold text-foreground">Payment Methods</h1>
                 {isAdmin && (
                     <Button onClick={() => setShowAddModal(true)} className="flex items-center gap-2">
                         <Plus className="h-4 w-4" />
@@ -101,25 +101,25 @@ const PaymentMethodsPage = () => {
                 )}
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden">
                 {paymentMethods?.length === 0 ? (
-                    <div className="p-8 text-center text-gray-500">
+                    <div className="p-8 text-center text-muted-foreground">
                         No payment methods found.
                         {isAdmin && <p className="mt-2 text-sm">Click "Add Payment Method" to create one for a user.</p>}
                     </div>
                 ) : (
                     <div className="divide-y divide-gray-100">
                         {paymentMethods?.map((pm) => (
-                            <div key={pm.id} className="p-6 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                            <div key={pm.id} className="p-6 flex items-center justify-between hover:bg-muted/30 transition-colors">
                                 <div className="flex items-center gap-4">
-                                    <div className="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600">
+                                    <div className="h-12 w-12 bg-muted rounded-lg flex items-center justify-center text-muted-foreground">
                                         <CreditCard className="h-6 w-6" />
                                     </div>
                                     <div>
-                                        <div className="font-medium text-secondary capitalize">
+                                        <div className="font-medium text-foreground capitalize">
                                             {pm.brand} •••• {pm.last4}
                                         </div>
-                                        <div className="text-sm text-gray-500">
+                                        <div className="text-sm text-muted-foreground">
                                             User ID: {pm.user_id}
                                         </div>
                                     </div>
@@ -134,7 +134,7 @@ const PaymentMethodsPage = () => {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="text-gray-400 hover:text-accent"
+                                        className="text-muted-foreground hover:text-accent"
                                         onClick={() => deleteMutation.mutate(pm.id)}
                                     >
                                         <Trash2 className="h-5 w-5" />
@@ -150,7 +150,7 @@ const PaymentMethodsPage = () => {
             {showAddModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
-                        <h2 className="text-xl font-bold text-secondary mb-4">Add Payment Method</h2>
+                        <h2 className="text-xl font-bold text-foreground mb-4">Add Payment Method</h2>
                         
                         <form onSubmit={handleAddPaymentMethod} className="space-y-4">
                             <div>
@@ -160,7 +160,7 @@ const PaymentMethodsPage = () => {
                                 <select
                                     value={selectedUserId}
                                     onChange={(e) => setSelectedUserId(e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                                    className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                                 >
                                     <option value="">-- My Account --</option>
                                     {users.map((u) => (
@@ -178,7 +178,7 @@ const PaymentMethodsPage = () => {
                                 <select
                                     value={cardBrand}
                                     onChange={(e) => setCardBrand(e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                                    className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
                                 >
                                     <option value="visa">Visa</option>
                                     <option value="mastercard">Mastercard</option>
@@ -208,7 +208,7 @@ const PaymentMethodsPage = () => {
                                     id="isDefault"
                                     checked={isDefault}
                                     onChange={(e) => setIsDefault(e.target.checked)}
-                                    className="rounded border-gray-300 text-primary focus:ring-primary"
+                                    className="rounded border-input text-primary focus:ring-primary"
                                 />
                                 <label htmlFor="isDefault" className="text-sm text-gray-700">
                                     Set as default payment method

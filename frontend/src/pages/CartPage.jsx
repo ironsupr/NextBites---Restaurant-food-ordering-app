@@ -41,11 +41,11 @@ const CartPage = () => {
     if (!cart || !cart.order_items || cart.order_items.length === 0) {
         return (
             <div className="text-center py-16">
-                <div className="mx-auto h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                    <ShoppingBag className="h-8 w-8 text-gray-400" />
+                <div className="mx-auto h-16 w-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                    <ShoppingBag className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <h2 className="text-2xl font-bold text-secondary mb-2">Your cart is empty</h2>
-                <p className="text-gray-500 mb-8">Looks like you haven't added anything yet.</p>
+                <h2 className="text-2xl font-bold text-foreground mb-2">Your cart is empty</h2>
+                <p className="text-muted-foreground mb-8">Looks like you haven't added anything yet.</p>
                 <Link to="/restaurants">
                     <Button>Browse Restaurants</Button>
                 </Link>
@@ -55,50 +55,52 @@ const CartPage = () => {
 
     return (
         <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold text-secondary mb-8">Your Cart</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-8">Your Cart</h1>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
                 <div className="p-6 space-y-6">
                     {cart.order_items.map((item) => (
-                        <div key={item.id} className="flex items-center justify-between py-4 border-b border-gray-100 last:border-0">
+                        <div key={item.id} className="flex items-center justify-between py-4 border-b border-border last:border-0">
                             <div className="flex items-center gap-4">
-                                <div className="h-16 w-16 bg-gray-100 rounded-lg flex items-center justify-center">
-                                    <ShoppingBag className="h-6 w-6 text-gray-400" />
+                                <div className="h-16 w-16 bg-muted rounded-lg flex items-center justify-center">
+                                    <ShoppingBag className="h-6 w-6 text-muted-foreground" />
                                 </div>
                                 <div>
-                                    <h3 className="font-medium text-secondary">{item.menu_item_name || `Item #${item.menu_item_id}`}</h3>
-                                    <p className="text-sm text-gray-500">${item.price_at_time} x {item.quantity}</p>
+                                    <h3 className="font-medium text-foreground">{item.menu_item_name || `Item #${item.menu_item_id}`}</h3>
+                                    <p className="text-sm text-muted-foreground">${item.price_at_time} x {item.quantity}</p>
                                 </div>
                             </div>
 
                             <div className="flex items-center gap-6">
-                                <span className="font-medium text-secondary">
+                                <span className="font-medium text-foreground">
                                     ${(item.price_at_time * item.quantity).toFixed(2)}
                                 </span>
-                                <button
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
                                     onClick={() => removeItemMutation.mutate({ orderId: cart.id, itemId: item.id })}
-                                    className="text-gray-400 hover:text-accent transition-colors"
+                                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                                 >
                                     <Trash2 className="h-5 w-5" />
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     ))}
                 </div>
 
-                <div className="bg-gray-50 p-6 border-t border-gray-100">
+                <div className="bg-muted/30 p-6 border-t border-border">
                     <div className="flex justify-between items-center mb-6">
-                        <span className="text-lg font-medium text-secondary">Total</span>
+                        <span className="text-lg font-medium text-foreground">Total</span>
                         <span className="text-2xl font-bold text-primary">${cart.total_amount?.toFixed(2) || '0.00'}</span>
                     </div>
 
                     {/* Show warning for Team Members */}
                     {!canCheckout && (
-                        <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-3">
-                            <AlertCircle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                        <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3">
+                            <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
                             <div>
-                                <p className="text-sm font-medium text-yellow-800">Checkout not available</p>
-                                <p className="text-sm text-yellow-700">As a Team Member, you cannot checkout orders. Please ask a Manager or Admin to complete this order.</p>
+                                <p className="text-sm font-medium text-amber-800">Checkout not available</p>
+                                <p className="text-sm text-amber-700">As a Team Member, you cannot checkout orders. Please ask a Manager or Admin to complete this order.</p>
                             </div>
                         </div>
                     )}

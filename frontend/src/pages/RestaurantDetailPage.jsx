@@ -3,7 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../utils/api';
 import Button from '../components/Button';
-import { ArrowLeft, Plus, ShoppingCart, Check } from 'lucide-react';
+import { ArrowLeft, Plus, ShoppingCart, Check, Star, MapPin, Clock, Info, ShoppingBag } from 'lucide-react';
+import { cn } from '../utils/cn';
 
 const RestaurantDetailPage = () => {
     const { id } = useParams();
@@ -101,118 +102,133 @@ const RestaurantDetailPage = () => {
         return item ? item.quantity : 0;
     };
 
-    const cartItemCount = currentCart?.order_items?.length || 0;
-
     if (restaurantLoading || menuLoading) {
         return (
-            <div className="flex justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+            <div className="space-y-8 animate-pulse">
+                <div className="h-80 bg-muted rounded-3xl w-full" />
+                <div className="space-y-4">
+                    <div className="h-8 bg-muted rounded w-1/3" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {[1, 2, 3, 4].map((i) => (
+                            <div key={i} className="h-40 bg-muted rounded-2xl" />
+                        ))}
+                    </div>
+                </div>
             </div>
         );
     }
 
+    if (!restaurant) return <div className="text-center py-20">Restaurant not found</div>;
+
     return (
-        <div className="max-w-6xl mx-auto">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-4">
-                    <Link to="/restaurants" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                        <ArrowLeft className="h-6 w-6 text-gray-600" />
-                    </Link>
-                    <div>
-                        <h1 className="text-3xl font-bold text-secondary">{restaurant?.name}</h1>
-                        <p className="text-gray-500">{restaurant?.cuisine_type} • {restaurant?.address}</p>
-                    </div>
-                </div>
-
-                {/* Cart Button */}
-                <Link to="/cart" className="relative">
-                    <Button variant="outline" className="flex items-center gap-2">
-                        <ShoppingCart className="h-5 w-5" />
-                        View Cart
-                        {cartItemCount > 0 && (
-                            <span className="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                                {cartItemCount}
-                            </span>
-                        )}
-                    </Button>
-                </Link>
-            </div>
-
-            {/* Menu Section */}
-            <div className="mb-6">
-                <h2 className="text-2xl font-semibold text-secondary mb-4">Menu</h2>
-            </div>
-
-            {/* Menu Items Grid */}
-            {menuItems.length === 0 ? (
-                <div className="text-center py-12 bg-gray-50 rounded-xl">
-                    <p className="text-gray-500">No menu items available for this restaurant.</p>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {menuItems.map((item) => {
-                        const quantityInCart = getItemQuantityInCart(item.id);
-                        const isAdding = addItemMutation.isPending;
-
-                        return (
-                            <div
-                                key={item.id}
-                                className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
-                            >
-                                {/* Item Image Placeholder */}
-                                <div className="h-40 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
-                                    <span className="text-4xl">🍽️</span>
-                                </div>
-
-                                <div className="p-4">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h3 className="font-semibold text-secondary">{item.name}</h3>
-                                        <span className="text-primary font-bold">${item.price?.toFixed(2)}</span>
-                                    </div>
-
-                                    {item.description && (
-                                        <p className="text-gray-500 text-sm mb-4 line-clamp-2">{item.description}</p>
-                                    )}
-
-                                    <div className="flex items-center justify-between">
-                                        {quantityInCart > 0 && (
-                                            <span className="text-sm text-green-600 flex items-center gap-1">
-                                                <Check className="h-4 w-4" />
-                                                {quantityInCart} in cart
-                                            </span>
-                                        )}
-                                        
-                                        <Button
-                                            size="sm"
-                                            onClick={() => handleAddToCart(item)}
-                                            disabled={isAdding}
-                                            className="ml-auto flex items-center gap-1"
-                                        >
-                                            <Plus className="h-4 w-4" />
-                                            {quantityInCart > 0 ? 'Add More' : 'Add to Cart'}
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
-
-            {/* Floating Cart Summary */}
-            {cartItemCount > 0 && (
-                <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-secondary text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-4">
-                    <span className="font-medium">
-                        {cartItemCount} item{cartItemCount > 1 ? 's' : ''} in cart
-                    </span>
-                    <Link to="/cart">
-                        <Button size="sm" className="bg-white text-secondary hover:bg-gray-100">
-                            View Cart
+        <div className="-mt-8">
+            {/* Restaurant Header */}
+            <div className="relative h-[400px] rounded-3xl overflow-hidden mb-10 shadow-2xl">
+                <img
+                    src={restaurant.image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1600'}
+                    alt={restaurant.name}
+                    className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                
+                <div className="absolute top-6 left-6 z-10">
+                    <Link to="/restaurants">
+                        <Button variant="secondary" size="sm" className="rounded-full bg-white/20 backdrop-blur-md border-white/10 text-white hover:bg-white/30">
+                            <ArrowLeft className="h-4 w-4 mr-2" /> Back
                         </Button>
                     </Link>
                 </div>
-            )}
+
+                <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 text-white">
+                    <div className="max-w-4xl mx-auto">
+                        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                            <div>
+                                <h1 className="text-4xl md:text-5xl font-bold mb-4">{restaurant.name}</h1>
+                                <div className="flex flex-wrap items-center gap-4 text-sm md:text-base font-medium text-slate-200">
+                                    <span className="flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full">
+                                        <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" /> 4.8 (500+)
+                                    </span>
+                                    <span className="flex items-center gap-1.5">
+                                        <MapPin className="h-4 w-4 text-primary" /> {restaurant.address}, {restaurant.city}
+                                    </span>
+                                    <span className="flex items-center gap-1.5">
+                                        <Clock className="h-4 w-4 text-primary" /> 20-30 min
+                                    </span>
+                                    <span className="flex items-center gap-1.5">
+                                        <Info className="h-4 w-4 text-primary" /> $$ • {restaurant.country} Cuisine
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="flex gap-3">
+                                {currentCart && currentCart.restaurant_id === parseInt(id) && (
+                                    <Link to="/cart">
+                                        <Button className="rounded-full bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20">
+                                            <ShoppingCart className="h-4 w-4 mr-2" />
+                                            View Cart ({currentCart.order_items?.length || 0})
+                                        </Button>
+                                    </Link>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="max-w-4xl mx-auto">
+                {/* Menu Section */}
+                <div className="mb-8">
+                    <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
+                        <ShoppingBag className="h-6 w-6 text-primary" />
+                        Menu
+                    </h2>
+                    
+                    <div className="grid grid-cols-1 gap-6">
+                        {menuItems?.map((item) => {
+                            const quantity = getItemQuantityInCart(item.id);
+                            return (
+                                <div key={item.id} className="group bg-card hover:bg-secondary/30 border border-border rounded-2xl p-4 flex gap-4 transition-all duration-200 hover:shadow-md hover:border-primary/20">
+                                    <div className="h-32 w-32 flex-shrink-0 rounded-xl overflow-hidden bg-muted">
+                                        <img 
+                                            src={item.image_url || `https://source.unsplash.com/400x400/?food,${item.name.replace(' ', '')}`} 
+                                            alt={item.name}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'; }}
+                                        />
+                                    </div>
+                                    
+                                    <div className="flex-1 flex flex-col justify-between py-1">
+                                        <div>
+                                            <div className="flex justify-between items-start mb-1">
+                                                <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">{item.name}</h3>
+                                                <span className="text-lg font-bold text-primary">${item.price}</span>
+                                            </div>
+                                            <p className="text-muted-foreground text-sm line-clamp-2 mb-2">{item.description}</p>
+                                        </div>
+                                        
+                                        <div className="flex justify-end items-center gap-3">
+                                            {quantity > 0 && (
+                                                <span className="text-sm font-medium text-primary bg-primary/10 px-3 py-1 rounded-full flex items-center gap-1">
+                                                    <Check className="h-3 w-3" /> {quantity} in cart
+                                                </span>
+                                            )}
+                                            <Button 
+                                                size="sm" 
+                                                onClick={() => handleAddToCart(item)}
+                                                disabled={addItemMutation.isPending}
+                                                className="rounded-full px-6 shadow-sm group-hover:shadow-md transition-all"
+                                            >
+                                                {addItemMutation.isPending ? 'Adding...' : (
+                                                    <>Add <Plus className="ml-2 h-4 w-4" /></>
+                                                )}
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };

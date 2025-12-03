@@ -390,29 +390,35 @@ async def checkout_order(
     # Calculate total
     order.calculate_total()
     
-    try:
-        # Create Stripe payment intent
-        payment_intent = stripe.PaymentIntent.create(
-            amount=int(order.total_amount * 100),  # Amount in cents
-            currency="usd",
-            payment_method=payment_method.stripe_payment_method_id,
-            confirm=True,
-            automatic_payment_methods={
-                "enabled": True,
-                "allow_redirects": "never"
-            }
-        )
-        
-        order.stripe_payment_intent_id = payment_intent.id
+    # Handle Cash payments
+    if payment_method.brand == "Cash":
         order.status = OrderStatus.COMPLETED
         db.commit()
         db.refresh(order)
-        
-    except stripe.error.StripeError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Payment failed: {str(e)}"
-        )
+    else:
+        try:
+            # Create Stripe payment intent
+            payment_intent = stripe.PaymentIntent.create(
+                amount=int(order.total_amount * 100),  # Amount in cents
+                currency="usd",
+                payment_method=payment_method.stripe_payment_method_id,
+                confirm=True,
+                automatic_payment_methods={
+                    "enabled": True,
+                    "allow_redirects": "never"
+                }
+            )
+            
+            order.stripe_payment_intent_id = payment_intent.id
+            order.status = OrderStatus.COMPLETED
+            db.commit()
+            db.refresh(order)
+            
+        except stripe.error.StripeError as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Payment failed: {str(e)}"
+            )
     
     # Build response
     order_items = []

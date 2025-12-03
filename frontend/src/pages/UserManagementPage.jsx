@@ -55,36 +55,36 @@ const UserManagementPage = () => {
     return (
         <div className="space-y-8">
             <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold text-secondary">User Management</h1>
+                <h1 className="text-3xl font-bold text-foreground">User Management</h1>
                 <Button onClick={() => setIsModalOpen(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add User
                 </Button>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                        <thead className="bg-gray-50 border-b border-gray-100">
+                        <thead className="bg-muted/30 border-b border-border">
                             <tr>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">User</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Country</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">User</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Role</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Country</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                             {users?.map((user) => (
-                                <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
+                                <tr key={user.id} className="hover:bg-muted/30/50 transition-colors">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             <div className="h-8 w-8 bg-primary/10 rounded-full flex items-center justify-center text-primary">
                                                 <User className="h-4 w-4" />
                                             </div>
                                             <div>
-                                                <div className="font-medium text-secondary">{user.email}</div>
-                                                <div className="text-xs text-gray-500">ID: {user.id}</div>
+                                                <div className="font-medium text-foreground">{user.email}</div>
+                                                <div className="text-xs text-muted-foreground">ID: {user.id}</div>
                                             </div>
                                         </div>
                                     </td>
@@ -92,25 +92,25 @@ const UserManagementPage = () => {
                                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
                       ${user.role === 'admin' ? 'bg-purple-100 text-purple-700' :
                                                 user.role === 'manager' ? 'bg-blue-100 text-blue-700' :
-                                                    'bg-gray-100 text-gray-700'}`}>
+                                                    'bg-muted text-gray-700'}`}>
                                             {user.role === 'admin' && <Shield className="h-3 w-3 mr-1" />}
                                             {user.role.replace('_', ' ')}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-600">
+                                    <td className="px-6 py-4 text-sm text-muted-foreground">
                                         <div className="flex items-center gap-1.5">
-                                            <MapPin className="h-3 w-3 text-gray-400" />
+                                            <MapPin className="h-3 w-3 text-muted-foreground" />
                                             {user.country}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${user.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                        <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${user.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
                                             {user.is_active ? 'Active' : 'Inactive'}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
                                         <select
-                                            className="text-sm border-gray-200 rounded-md focus:ring-primary focus:border-primary"
+                                            className="text-sm border-border rounded-md focus:ring-primary focus:border-primary"
                                             value={user.role}
                                             onChange={(e) => updateUserRoleMutation.mutate({ userId: user.id, role: e.target.value })}
                                             disabled={user.role === 'admin' && user.email === 'admin@nextbite.com'} // Prevent changing root admin
@@ -132,8 +132,8 @@ const UserManagementPage = () => {
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-bold text-secondary">Add New User</h2>
-                            <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                            <h2 className="text-xl font-bold text-foreground">Add New User</h2>
+                            <button onClick={() => setIsModalOpen(false)} className="text-muted-foreground hover:text-muted-foreground">
                                 <X className="h-5 w-5" />
                             </button>
                         </div>
@@ -156,9 +156,9 @@ const UserManagementPage = () => {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-secondary mb-1.5">Role</label>
+                                    <label className="block text-sm font-medium text-foreground mb-1.5">Role</label>
                                     <select
-                                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                                        className="w-full rounded-lg border border-input px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary"
                                         value={newUser.role}
                                         onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
                                     >
@@ -168,9 +168,9 @@ const UserManagementPage = () => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-secondary mb-1.5">Country</label>
+                                    <label className="block text-sm font-medium text-foreground mb-1.5">Country</label>
                                     <select
-                                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                                        className="w-full rounded-lg border border-input px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary"
                                         value={newUser.country}
                                         onChange={(e) => setNewUser({ ...newUser, country: e.target.value })}
                                     >

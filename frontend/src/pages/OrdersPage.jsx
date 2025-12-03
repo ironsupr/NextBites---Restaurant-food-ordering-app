@@ -31,10 +31,10 @@ const OrdersPage = () => {
 
     const getStatusColor = (status) => {
         switch (status) {
-            case 'completed': return 'bg-green-100 text-green-700';
-            case 'pending': return 'bg-yellow-100 text-yellow-700';
-            case 'cancelled': return 'bg-red-100 text-red-700';
-            default: return 'bg-gray-100 text-gray-700';
+            case 'completed': return 'bg-emerald-100 text-emerald-700';
+            case 'pending': return 'bg-amber-100 text-amber-700';
+            case 'cancelled': return 'bg-rose-100 text-rose-700';
+            default: return 'bg-muted text-gray-700';
         }
     };
 
@@ -58,40 +58,40 @@ const OrdersPage = () => {
 
     return (
         <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold text-secondary mb-8">My Orders</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-8">My Orders</h1>
 
             {!orders || orders.length === 0 ? (
-                <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
-                    <p className="text-gray-500">No past orders found.</p>
+                <div className="text-center py-12 bg-white rounded-xl border border-border">
+                    <p className="text-muted-foreground">No past orders found.</p>
                 </div>
             ) : (
                 <div className="space-y-6">
                     {orders.map((order) => (
-                        <div key={order.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div key={order.id} className="bg-white rounded-xl shadow-sm border border-border overflow-hidden">
                             <div className="p-6">
                                 <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
                                     <div>
                                         <div className="flex items-center gap-3 mb-1">
-                                            <span className="font-bold text-lg text-secondary">Order #{order.id}</span>
+                                            <span className="font-bold text-lg text-foreground">Order #{order.id}</span>
                                             <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium flex items-center gap-1.5 ${getStatusColor(order.status)}`}>
                                                 {getStatusIcon(order.status)}
                                                 {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                                             </span>
                                         </div>
-                                        <p className="text-sm text-gray-500">
+                                        <p className="text-sm text-muted-foreground">
                                             {new Date(order.created_at).toLocaleDateString()} at {new Date(order.created_at).toLocaleTimeString()}
                                         </p>
                                     </div>
                                     <div className="text-right flex items-center gap-4">
                                         <div>
                                             <span className="block text-2xl font-bold text-primary">${order.total_amount?.toFixed(2) || '0.00'}</span>
-                                            <span className="text-sm text-gray-500">{order.order_items?.length || 0} items</span>
+                                            <span className="text-sm text-muted-foreground">{order.order_items?.length || 0} items</span>
                                         </div>
                                         {canCancelOrder(order) && (
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="text-red-600 border-red-200 hover:bg-red-50"
+                                                className="text-rose-600 border-rose-200 hover:bg-rose-50"
                                                 onClick={() => cancelOrderMutation.mutate(order.id)}
                                                 disabled={cancelOrderMutation.isPending}
                                             >
@@ -102,14 +102,14 @@ const OrdersPage = () => {
                                     </div>
                                 </div>
 
-                                <div className="border-t border-gray-100 pt-4">
+                                <div className="border-t border-border pt-4">
                                     <div className="space-y-3">
                                         {order.order_items?.map((item) => (
                                             <div key={item.id} className="flex justify-between text-sm">
-                                                <span className="text-gray-600">
+                                                <span className="text-muted-foreground">
                                                     {item.quantity}x {item.menu_item_name || `Item #${item.menu_item_id}`}
                                                 </span>
-                                                <span className="font-medium text-secondary">
+                                                <span className="font-medium text-foreground">
                                                     ${(item.price_at_time * item.quantity).toFixed(2)}
                                                 </span>
                                             </div>

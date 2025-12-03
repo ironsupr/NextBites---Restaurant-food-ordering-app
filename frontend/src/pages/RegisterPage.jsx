@@ -30,16 +30,16 @@ const RegisterPage = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+        <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-md w-full space-y-8 bg-card p-8 rounded-xl shadow-sm border border-border">
                 <div className="text-center">
                     <div className="mx-auto h-12 w-12 bg-primary rounded-xl flex items-center justify-center">
-                        <ShoppingBag className="h-8 w-8 text-white" />
+                        <ShoppingBag className="h-8 w-8 text-primary-foreground" />
                     </div>
-                    <h2 className="mt-6 text-3xl font-extrabold text-secondary">
+                    <h2 className="mt-6 text-3xl font-bold tracking-tight text-foreground">
                         Create an account
                     </h2>
-                    <p className="mt-2 text-sm text-gray-600">
+                    <p className="mt-2 text-sm text-muted-foreground">
                         Join NextBite to order delicious food
                     </p>
                 </div>
@@ -62,13 +62,12 @@ const RegisterPage = () => {
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="Create a password"
                         />
-
-                        <div className="w-full">
-                            <label className="block text-sm font-medium text-secondary mb-1.5">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                                 Location
                             </label>
                             <select
-                                className="flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
+                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                 value={country}
                                 onChange={(e) => setCountry(e.target.value)}
                             >
@@ -79,7 +78,7 @@ const RegisterPage = () => {
                     </div>
 
                     {error && (
-                        <div className="text-sm text-accent bg-accent/10 p-3 rounded-lg">
+                        <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
                             {error}
                         </div>
                     )}
@@ -93,8 +92,8 @@ const RegisterPage = () => {
                     </Button>
 
                     <div className="text-center text-sm">
-                        <span className="text-gray-600">Already have an account? </span>
-                        <Link to="/login" className="font-medium text-primary hover:text-primary-hover">
+                        <span className="text-muted-foreground">Already have an account? </span>
+                        <Link to="/login" className="font-medium text-primary hover:text-primary/80">
                             Sign in
                         </Link>
                     </div>

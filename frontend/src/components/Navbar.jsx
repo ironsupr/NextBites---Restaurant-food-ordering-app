@@ -26,103 +26,106 @@ const Navbar = () => {
     ];
 
     return (
-        <nav className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-gray-100">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between h-16 items-center">
-                    {/* Logo */}
-                    <Link to="/" className="flex items-center gap-2">
-                        <div className="bg-primary p-1.5 rounded-lg">
-                            <ShoppingBag className="h-6 w-6 text-white" />
+        <nav className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md shadow-sm border-b border-border/50">
+            <div className="container-width flex h-16 items-center justify-between">
+                {/* Logo */}
+                <Link to="/" className="flex items-center gap-2 group">
+                    <div className="bg-primary p-2 rounded-full group-hover:bg-primary/90 transition-colors shadow-sm">
+                        <ShoppingBag className="h-5 w-5 text-primary-foreground" />
+                    </div>
+                    <span className="font-bold text-xl tracking-tight text-foreground">NextBite</span>
+                </Link>
+
+                {/* Desktop Navigation */}
+                <div className="hidden md:flex items-center gap-6">
+                    {navLinks.filter(link => link.show).map((link) => (
+                        <Link
+                            key={link.path}
+                            to={link.path}
+                            className={cn(
+                                "text-sm font-medium transition-colors hover:text-primary",
+                                location.pathname === link.path ? "text-primary" : "text-muted-foreground"
+                            )}
+                        >
+                            {link.name}
+                        </Link>
+                    ))}
+                </div>
+
+                {/* User Actions */}
+                <div className="hidden md:flex items-center gap-4">
+                    {user ? (
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2 px-3 py-1.5 bg-secondary rounded-full border border-border">
+                                {user.role === 'admin' && <Shield className="h-4 w-4 text-primary" />}
+                                <span className="text-sm font-medium">
+                                    {user.email.split('@')[0]}
+                                </span>
+                                <span className="text-xs text-muted-foreground capitalize px-2 py-0.5 bg-background rounded-full border border-border">
+                                    {user.role.replace('_', ' ')}
+                                </span>
+                            </div>
+                            <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout">
+                                <LogOut className="h-5 w-5" />
+                            </Button>
                         </div>
-                        <span className="font-bold text-xl text-secondary">NextBite</span>
-                    </Link>
-
-                    {/* Desktop Navigation */}
-                    <div className="hidden md:flex items-center gap-6">
-                        {navLinks.filter(link => link.show).map((link) => (
-                            <Link
-                                key={link.path}
-                                to={link.path}
-                                className={cn(
-                                    "text-sm font-medium transition-colors hover:text-primary",
-                                    location.pathname === link.path ? "text-primary" : "text-secondary"
-                                )}
-                            >
-                                {link.name}
+                    ) : (
+                        <div className="flex items-center gap-2">
+                            <Link to="/login">
+                                <Button variant="ghost">Login</Button>
                             </Link>
-                        ))}
-                    </div>
+                            <Link to="/register">
+                                <Button>Sign Up</Button>
+                            </Link>
+                        </div>
+                    )}
+                </div>
 
-                    {/* User Actions */}
-                    <div className="hidden md:flex items-center gap-4">
-                        {user ? (
-                            <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-100">
-                                    {user.role === 'admin' && <Shield className="h-4 w-4 text-primary" />}
-                                    <span className="text-sm font-medium text-secondary">
-                                        {user.email.split('@')[0]}
-                                    </span>
-                                    <span className="text-xs text-gray-500 capitalize px-2 py-0.5 bg-white rounded-full border border-gray-100">
-                                        {user.role.replace('_', ' ')}
-                                    </span>
-                                </div>
-                                <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout">
-                                    <LogOut className="h-5 w-5" />
-                                </Button>
-                            </div>
-                        ) : (
-                            <div className="flex items-center gap-2">
-                                <Link to="/login">
-                                    <Button variant="ghost">Login</Button>
-                                </Link>
-                                <Link to="/register">
-                                    <Button>Sign Up</Button>
-                                </Link>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Mobile Menu Button */}
-                    <div className="md:hidden">
-                        <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-                        </Button>
-                    </div>
+                {/* Mobile Menu Button */}
+                <div className="md:hidden">
+                    <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                        {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                    </Button>
                 </div>
             </div>
 
             {/* Mobile Menu */}
             {isMenuOpen && (
-                <div className="md:hidden border-t border-gray-100 bg-white">
+                <div className="md:hidden border-t bg-background">
                     <div className="px-4 pt-2 pb-4 space-y-1">
                         {navLinks.filter(link => link.show).map((link) => (
                             <Link
                                 key={link.path}
                                 to={link.path}
+                                onClick={() => setIsMenuOpen(false)}
                                 className={cn(
-                                    "block px-3 py-2 rounded-md text-base font-medium",
+                                    "block px-3 py-2 rounded-md text-base font-medium transition-colors",
                                     location.pathname === link.path
                                         ? "bg-primary/10 text-primary"
-                                        : "text-secondary hover:bg-gray-50"
+                                        : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                                 )}
-                                onClick={() => setIsMenuOpen(false)}
                             >
                                 {link.name}
                             </Link>
                         ))}
                         {user ? (
-                            <div className="mt-4 pt-4 border-t border-gray-100">
-                                <div className="px-3 flex items-center gap-2 mb-3">
-                                    <User className="h-5 w-5 text-gray-400" />
-                                    <span className="font-medium text-secondary">{user.email}</span>
+                            <div className="mt-4 pt-4 border-t border-border">
+                                <div className="flex items-center gap-2 px-3 mb-3">
+                                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                        <User className="h-4 w-4 text-primary" />
+                                    </div>
+                                    <div>
+                                        <div className="text-sm font-medium">{user.email}</div>
+                                        <div className="text-xs text-muted-foreground capitalize">{user.role.replace('_', ' ')}</div>
+                                    </div>
                                 </div>
-                                <Button variant="outline" className="w-full justify-start" onClick={handleLogout}>
-                                    <LogOut className="h-4 w-4 mr-2" />
+                                <Button variant="destructive" className="w-full justify-start" onClick={handleLogout}>
+                                    <LogOut className="mr-2 h-4 w-4" />
                                     Logout
                                 </Button>
                             </div>
                         ) : (
-                            <div className="mt-4 pt-4 border-t border-gray-100 grid gap-2">
+                            <div className="mt-4 pt-4 border-t border-border space-y-2">
                                 <Link to="/login" onClick={() => setIsMenuOpen(false)}>
                                     <Button variant="ghost" className="w-full justify-start">Login</Button>
                                 </Link>

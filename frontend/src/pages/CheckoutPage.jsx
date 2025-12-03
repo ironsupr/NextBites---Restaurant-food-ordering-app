@@ -86,7 +86,7 @@ const CheckoutForm = ({ orderId, totalAmount }) => {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <div className="bg-muted/30 p-4 rounded-lg border border-border">
                 <CardElement
                     options={{
                         style: {
@@ -106,7 +106,7 @@ const CheckoutForm = ({ orderId, totalAmount }) => {
             </div>
 
             {error && (
-                <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">
+                <div className="text-sm text-rose-600 bg-rose-50 p-3 rounded-lg">
                     {error}
                 </div>
             )}
@@ -140,20 +140,20 @@ const CheckoutPage = () => {
 
     return (
         <div className="max-w-md mx-auto">
-            <h1 className="text-2xl font-bold text-secondary mb-6">Checkout</h1>
+            <h1 className="text-2xl font-bold text-foreground mb-6">Checkout</h1>
 
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-border mb-6">
                 <div className="flex justify-between items-center mb-4">
-                    <span className="text-gray-600">Order Total</span>
+                    <span className="text-muted-foreground">Order Total</span>
                     <span className="text-2xl font-bold text-primary">${order.total_amount.toFixed(2)}</span>
                 </div>
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-muted-foreground">
                     Order #{order.id} • {order.items.length} items
                 </div>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h2 className="text-lg font-medium text-secondary mb-4">Payment Details</h2>
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-border">
+                <h2 className="text-lg font-medium text-foreground mb-4">Payment Details</h2>
                 <Elements stripe={stripePromise}>
                     <CheckoutForm orderId={order.id} totalAmount={order.total_amount} />
                 </Elements>

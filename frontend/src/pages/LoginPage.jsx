@@ -32,16 +32,16 @@ const LoginPage = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+        <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-md w-full space-y-8 bg-card p-8 rounded-xl shadow-sm border border-border">
                 <div className="text-center">
                     <div className="mx-auto h-12 w-12 bg-primary rounded-xl flex items-center justify-center">
-                        <ShoppingBag className="h-8 w-8 text-white" />
+                        <ShoppingBag className="h-8 w-8 text-primary-foreground" />
                     </div>
-                    <h2 className="mt-6 text-3xl font-extrabold text-secondary">
+                    <h2 className="mt-6 text-3xl font-bold tracking-tight text-foreground">
                         Welcome back
                     </h2>
-                    <p className="mt-2 text-sm text-gray-600">
+                    <p className="mt-2 text-sm text-muted-foreground">
                         Sign in to your account to continue
                     </p>
                 </div>
@@ -67,7 +67,7 @@ const LoginPage = () => {
                     </div>
 
                     {error && (
-                        <div className="text-sm text-accent bg-accent/10 p-3 rounded-lg">
+                        <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
                             {error}
                         </div>
                     )}
@@ -81,8 +81,8 @@ const LoginPage = () => {
                     </Button>
 
                     <div className="text-center text-sm">
-                        <span className="text-gray-600">Don't have an account? </span>
-                        <Link to="/register" className="font-medium text-primary hover:text-primary-hover">
+                        <span className="text-muted-foreground">Don't have an account? </span>
+                        <Link to="/register" className="font-medium text-primary hover:text-primary/80">
                             Sign up
                         </Link>
                     </div>

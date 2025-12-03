@@ -1,36 +1,111 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #FF6B35;
-  --color-primary-hover: #E85A2D;
-  --color-primary-light: #FFF0EB;
-  --color-secondary: #2B2D42;
-  --color-secondary-light: #8D99AE;
-  --color-accent: #EF233C;
-  --color-accent-light: #D90429;
-  --color-background: #F8F9FA;
-  --font-sans: 'Inter', sans-serif;
+  /* Slate Palette for Neutrals (Cooler, more tech/modern) */
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+  --color-slate-950: #020617;
+
+  /* Emerald Green for Primary (Fresh, Appetizing, Healthy) */
+  --color-emerald-50: #ecfdf5;
+  --color-emerald-100: #d1fae5;
+  --color-emerald-200: #a7f3d0;
+  --color-emerald-300: #6ee7b7;
+  --color-emerald-400: #34d399;
+  --color-emerald-500: #10b981;
+  --color-emerald-600: #059669;
+  --color-emerald-700: #047857;
+  --color-emerald-800: #065f46;
+  --color-emerald-900: #064e3b;
+  --color-emerald-950: #022c22;
+
+  /* Amber for Warning */
+  --color-amber-50: #fffbeb;
+  --color-amber-100: #fef3c7;
+  --color-amber-200: #fde68a;
+  --color-amber-300: #fcd34d;
+  --color-amber-400: #fbbf24;
+  --color-amber-500: #f59e0b;
+  --color-amber-600: #d97706;
+  --color-amber-700: #b45309;
+  --color-amber-800: #92400e;
+  --color-amber-900: #78350f;
+  --color-amber-950: #451a03;
+
+  /* Rose for Destructive/Error */
+  --color-rose-50: #fff1f2;
+  --color-rose-100: #ffe4e6;
+  --color-rose-200: #fecdd3;
+  --color-rose-300: #fda4af;
+  --color-rose-400: #fb7185;
+  --color-rose-500: #f43f5e;
+  --color-rose-600: #e11d48;
+  --color-rose-700: #be123c;
+  --color-rose-800: #9f1239;
+  --color-rose-900: #881337;
+  --color-rose-950: #4c0519;
+
+  /* Semantic Colors */
+  --color-background: #ffffff;
+  --color-foreground: var(--color-slate-900);
+  
+  --color-card: #ffffff;
+  --color-card-foreground: var(--color-slate-900);
+  
+  --color-popover: #ffffff;
+  --color-popover-foreground: var(--color-slate-900);
+  
+  --color-primary: var(--color-emerald-600);
+  --color-primary-foreground: #ffffff;
+  --color-primary-hover: var(--color-emerald-700);
+  
+  --color-secondary: var(--color-slate-100);
+  --color-secondary-foreground: var(--color-slate-900);
+  
+  --color-muted: var(--color-slate-100);
+  --color-muted-foreground: var(--color-slate-500);
+  
+  --color-accent: var(--color-emerald-50);
+  --color-accent-foreground: var(--color-emerald-900);
+  
+  --color-destructive: var(--color-rose-600);
+  --color-destructive-foreground: #ffffff;
+  
+  --color-border: var(--color-slate-200);
+  --color-input: var(--color-slate-200);
+  --color-ring: var(--color-emerald-600);
+
+  /* More rounded, friendly look */
+  --radius-lg: 0.75rem;
+  --radius-md: 0.5rem;
+  --radius-sm: 0.25rem;
+  
+  --font-sans: 'Plus Jakarta Sans', 'Inter', ui-sans-serif, system-ui, sans-serif;
 }
 
-@layer components {
-  .btn-primary {
-    @apply px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed;
+@layer base {
+  * {
+    @apply border-[var(--color-border)];
   }
-
-  .btn-secondary {
-    @apply px-4 py-2 bg-white text-[var(--color-secondary)] border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium;
-  }
-
-  .input-field {
-    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all duration-200;
-  }
-
-  .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-200;
+  body {
+    @apply bg-[var(--color-background)] text-[var(--color-foreground)] font-sans antialiased;
   }
 }
 
-/* Base styles */
-body {
-  @apply bg-[var(--color-background)] text-[var(--color-secondary)] font-sans antialiased;
+@layer utilities {
+  .glass {
+    @apply bg-white/90 backdrop-blur-lg border border-white/20 shadow-sm;
+  }
+  
+  .container-width {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
 }

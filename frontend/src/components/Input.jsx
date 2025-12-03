@@ -3,23 +3,23 @@ import { cn } from '../utils/cn';
 
 const Input = React.forwardRef(({ className, label, error, ...props }, ref) => {
     return (
-        <div className="w-full">
+        <div className="w-full space-y-2">
             {label && (
-                <label className="block text-sm font-medium text-secondary mb-1.5">
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                     {label}
                 </label>
             )}
             <input
                 className={cn(
-                    'flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200',
-                    error && 'border-accent focus:ring-accent/20 focus:border-accent',
+                    'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+                    error && 'border-destructive focus-visible:ring-destructive',
                     className
                 )}
                 ref={ref}
                 {...props}
             />
             {error && (
-                <p className="mt-1 text-sm text-accent">{error}</p>
+                <p className="text-sm font-medium text-destructive">{error}</p>
             )}
         </div>
     );

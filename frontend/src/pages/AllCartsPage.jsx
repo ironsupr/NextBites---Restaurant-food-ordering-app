@@ -16,8 +16,8 @@ const AllCartsPage = () => {
     if (user?.role === 'team_member') {
         return (
             <div className="text-center py-16">
-                <h2 className="text-2xl font-bold text-secondary mb-2">Access Denied</h2>
-                <p className="text-gray-500">Only admins and managers can view all carts.</p>
+                <h2 className="text-2xl font-bold text-foreground mb-2">Access Denied</h2>
+                <p className="text-muted-foreground">Only admins and managers can view all carts.</p>
             </div>
         );
     }
@@ -101,18 +101,18 @@ const AllCartsPage = () => {
 
     return (
         <div className="max-w-6xl mx-auto">
-            <h1 className="text-3xl font-bold text-secondary mb-8">All User Carts</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-8">All User Carts</h1>
 
             {carts.length === 0 ? (
-                <div className="text-center py-16 bg-gray-50 rounded-xl">
-                    <ShoppingCart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h2 className="text-xl font-semibold text-secondary mb-2">No active carts</h2>
-                    <p className="text-gray-500">No users currently have items in their cart.</p>
+                <div className="text-center py-16 bg-muted/30 rounded-xl">
+                    <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h2 className="text-xl font-semibold text-foreground mb-2">No active carts</h2>
+                    <p className="text-muted-foreground">No users currently have items in their cart.</p>
                 </div>
             ) : (
                 <div className="grid gap-6">
                     {carts.map((cart) => (
-                        <div key={cart.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div key={cart.id} className="bg-white rounded-xl shadow-sm border border-border overflow-hidden">
                             <div className="p-6">
                                 {/* Cart Header */}
                                 <div className="flex items-center justify-between mb-4">
@@ -121,22 +121,22 @@ const AllCartsPage = () => {
                                             <User className="h-5 w-5 text-primary" />
                                         </div>
                                         <div>
-                                            <h3 className="font-semibold text-secondary">{getUserName(cart.user_id)}</h3>
-                                            <p className="text-sm text-gray-500">Cart #{cart.id} • Restaurant #{cart.restaurant_id}</p>
+                                            <h3 className="font-semibold text-foreground">{getUserName(cart.user_id)}</h3>
+                                            <p className="text-sm text-muted-foreground">Cart #{cart.id} • Restaurant #{cart.restaurant_id}</p>
                                         </div>
                                     </div>
                                     <div className="text-right">
                                         <p className="text-2xl font-bold text-primary">${cart.total_amount?.toFixed(2) || '0.00'}</p>
-                                        <p className="text-sm text-gray-500">{cart.order_items?.length || 0} items</p>
+                                        <p className="text-sm text-muted-foreground">{cart.order_items?.length || 0} items</p>
                                     </div>
                                 </div>
 
                                 {/* Cart Items */}
-                                <div className="border-t border-gray-100 pt-4 mb-4">
+                                <div className="border-t border-border pt-4 mb-4">
                                     <div className="space-y-2">
                                         {cart.order_items?.map((item) => (
                                             <div key={item.id} className="flex justify-between text-sm">
-                                                <span className="text-gray-600">
+                                                <span className="text-muted-foreground">
                                                     {item.menu_item_name || `Item #${item.menu_item_id}`} x{item.quantity}
                                                 </span>
                                                 <span className="text-gray-900">${(item.price_at_time * item.quantity).toFixed(2)}</span>
@@ -162,16 +162,16 @@ const AllCartsPage = () => {
             {showPaymentModal && selectedCart && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
-                        <h2 className="text-xl font-bold text-secondary mb-4">Select Payment Method</h2>
-                        <p className="text-gray-500 mb-4">
+                        <h2 className="text-xl font-bold text-foreground mb-4">Select Payment Method</h2>
+                        <p className="text-muted-foreground mb-4">
                             Checking out cart for {getUserName(selectedCart.user_id)}
                         </p>
 
                         {paymentMethods.length === 0 ? (
-                            <div className="text-center py-8 bg-gray-50 rounded-lg mb-4">
-                                <CreditCard className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                                <p className="text-gray-500">No payment methods found for this user.</p>
-                                <p className="text-sm text-gray-400 mt-1">Add a payment method first.</p>
+                            <div className="text-center py-8 bg-muted/30 rounded-lg mb-4">
+                                <CreditCard className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                                <p className="text-muted-foreground">No payment methods found for this user.</p>
+                                <p className="text-sm text-muted-foreground mt-1">Add a payment method first.</p>
                             </div>
                         ) : (
                             <div className="space-y-2 mb-4">
@@ -180,11 +180,11 @@ const AllCartsPage = () => {
                                         key={pm.id}
                                         onClick={() => handleConfirmCheckout(pm.id)}
                                         disabled={checkoutMutation.isPending}
-                                        className="w-full p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-primary/5 transition-colors text-left flex items-center gap-3"
+                                        className="w-full p-4 border border-border rounded-lg hover:border-primary hover:bg-primary/5 transition-colors text-left flex items-center gap-3"
                                     >
-                                        <CreditCard className="h-5 w-5 text-gray-400" />
+                                        <CreditCard className="h-5 w-5 text-muted-foreground" />
                                         <div>
-                                            <p className="font-medium text-secondary">{pm.brand} •••• {pm.last4}</p>
+                                            <p className="font-medium text-foreground">{pm.brand} •••• {pm.last4}</p>
                                             {pm.is_default && <span className="text-xs text-primary">Default</span>}
                                         </div>
                                     </button>
