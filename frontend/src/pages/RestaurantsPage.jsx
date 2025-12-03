@@ -9,7 +9,7 @@ const RestaurantsPage = () => {
     const { data: restaurants, isLoading, error } = useQuery({
         queryKey: ['restaurants'],
         queryFn: async () => {
-            const response = await api.get('/restaurants');
+            const response = await api.get('/restaurants/');
             return response.data;
         },
     });

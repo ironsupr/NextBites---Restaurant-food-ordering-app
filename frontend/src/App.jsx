@@ -6,6 +6,7 @@ import Layout, { ProtectedRoute } from './components/Layout';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import RestaurantsPage from './pages/RestaurantsPage';
+import RestaurantDetailPage from './pages/RestaurantDetailPage';
 import CartPage from './pages/CartPage';
 import OrdersPage from './pages/OrdersPage';
 import CheckoutPage from './pages/CheckoutPage';
@@ -28,6 +29,7 @@ function App() {
                         <Route element={<Layout />}>
                             <Route path="/" element={<Navigate to="/restaurants" replace />} />
                             <Route path="/restaurants" element={<RestaurantsPage />} />
+                            <Route path="/restaurants/:id" element={<RestaurantDetailPage />} />
 
                             <Route element={<ProtectedRoute />}>
                                 <Route path="/orders" element={<OrdersPage />} />

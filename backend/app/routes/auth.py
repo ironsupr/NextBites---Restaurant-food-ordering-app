@@ -34,8 +34,8 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
     
-    # Create access token
-    access_token = create_access_token(data={"sub": new_user.id})
+    # Create access token (sub should be string per JWT spec)
+    access_token = create_access_token(data={"sub": str(new_user.id)})
     
     return TokenResponse(
         access_token=access_token,
@@ -62,8 +62,8 @@ async def login(credentials: LoginRequest, db: Session = Depends(get_db)):
             detail="Account is inactive"
         )
     
-    # Create access token
-    access_token = create_access_token(data={"sub": user.id})
+    # Create access token (sub should be string per JWT spec)
+    access_token = create_access_token(data={"sub": str(user.id)})
     
     return TokenResponse(
         access_token=access_token,

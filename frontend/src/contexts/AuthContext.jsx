@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import api from '../utils/api';
+import api, { setLastLoginTime } from '../utils/api';
 
 const AuthContext = createContext(null);
 
@@ -23,7 +23,8 @@ export const AuthProvider = ({ children }) => {
             const response = await api.post('/auth/login', { email, password });
             const { access_token, user } = response.data;
 
-            console.log('Login successful, setting user:', user);
+            // Set login time to prevent 401 redirect race condition
+            setLastLoginTime();
             localStorage.setItem('token', access_token);
             localStorage.setItem('user', JSON.stringify(user));
             setUser(user);
@@ -45,6 +46,8 @@ export const AuthProvider = ({ children }) => {
             });
             const { access_token, user } = response.data;
 
+            // Set login time to prevent 401 redirect race condition
+            setLastLoginTime();
             localStorage.setItem('token', access_token);
             localStorage.setItem('user', JSON.stringify(user));
             setUser(user);

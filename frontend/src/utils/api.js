@@ -7,11 +7,17 @@ const api = axios.create({
     },
 });
 
+// Track when we last logged in to prevent immediate 401 redirects
+let lastLoginTime = 0;
+
+export const setLastLoginTime = () => {
+    lastLoginTime = Date.now();
+};
+
 // Add a request interceptor to add the auth token to requests
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
-        console.log('API Request:', config.url, 'Token exists:', !!token);
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -26,11 +32,10 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        const isLoginRequest = error.config && error.config.url && error.config.url.includes('/auth/login');
+        const isAuthRequest = error.config?.url?.includes('/auth/');
+        const justLoggedIn = Date.now() - lastLoginTime < 5000;
 
-        if (error.response && error.response.status === 401 && !isLoginRequest) {
-            // Clear local storage and redirect to login if 401
-            // But don't redirect if we're already trying to login
+        if (error.response?.status === 401 && !isAuthRequest && !justLoggedIn) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             if (window.location.pathname !== '/login') {

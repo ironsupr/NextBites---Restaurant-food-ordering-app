@@ -6,7 +6,8 @@ from app.core.config import settings
 app = FastAPI(
     title=settings.APP_NAME,
     description="Backend for NextBite Food Ordering Platform",
-    version="1.0.0"
+    version="1.0.0",
+    redirect_slashes=False  # Prevent redirects that lose auth headers
 )
 
 # Configure CORS

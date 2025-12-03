@@ -1,15 +1,31 @@
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../utils/api';
-import { Clock, CheckCircle, XCircle, ShoppingBag } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, ShoppingBag, Trash2 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import Button from '../components/Button';
 
 const OrdersPage = () => {
+    const queryClient = useQueryClient();
+    const { hasPermission } = useAuth();
+    const canCancel = hasPermission('cancel_order');
+
     const { data: orders, isLoading } = useQuery({
         queryKey: ['orders'],
         queryFn: async () => {
-            const response = await api.get('/orders');
+            const response = await api.get('/orders/');
             // Filter out 'cart' status orders
             return response.data.filter(o => o.status !== 'cart').sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        },
+    });
+
+    // Cancel order mutation
+    const cancelOrderMutation = useMutation({
+        mutationFn: async (orderId) => {
+            await api.delete(`/orders/${orderId}`);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries(['orders']);
         },
     });
 
@@ -29,6 +45,11 @@ const OrdersPage = () => {
             case 'cancelled': return <XCircle className="h-4 w-4" />;
             default: return <ShoppingBag className="h-4 w-4" />;
         }
+    };
+
+    const canCancelOrder = (order) => {
+        // Can only cancel pending orders and if user has permission
+        return canCancel && order.status === 'pending';
     };
 
     if (isLoading) {
@@ -61,18 +82,32 @@ const OrdersPage = () => {
                                             {new Date(order.created_at).toLocaleDateString()} at {new Date(order.created_at).toLocaleTimeString()}
                                         </p>
                                     </div>
-                                    <div className="text-right">
-                                        <span className="block text-2xl font-bold text-primary">${order.total_amount.toFixed(2)}</span>
-                                        <span className="text-sm text-gray-500">{order.items.length} items</span>
+                                    <div className="text-right flex items-center gap-4">
+                                        <div>
+                                            <span className="block text-2xl font-bold text-primary">${order.total_amount?.toFixed(2) || '0.00'}</span>
+                                            <span className="text-sm text-gray-500">{order.order_items?.length || 0} items</span>
+                                        </div>
+                                        {canCancelOrder(order) && (
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="text-red-600 border-red-200 hover:bg-red-50"
+                                                onClick={() => cancelOrderMutation.mutate(order.id)}
+                                                disabled={cancelOrderMutation.isPending}
+                                            >
+                                                <Trash2 className="h-4 w-4 mr-1" />
+                                                Cancel
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
 
                                 <div className="border-t border-gray-100 pt-4">
                                     <div className="space-y-3">
-                                        {order.items.map((item) => (
+                                        {order.order_items?.map((item) => (
                                             <div key={item.id} className="flex justify-between text-sm">
                                                 <span className="text-gray-600">
-                                                    {item.quantity}x {item.menu_item.name}
+                                                    {item.quantity}x {item.menu_item_name || `Item #${item.menu_item_id}`}
                                                 </span>
                                                 <span className="font-medium text-secondary">
                                                     ${(item.price_at_time * item.quantity).toFixed(2)}
