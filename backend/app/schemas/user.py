@@ -6,6 +6,7 @@ from app.models.user import UserRole
 
 class UserBase(BaseModel):
     email: EmailStr
+    full_name: Optional[str] = None
     role: Optional[UserRole] = None
     country: Optional[str] = None
 
@@ -33,6 +34,7 @@ class UserRoleUpdate(BaseModel):
 
 class UserResponse(UserBase):
     id: int
+    user_uid: Optional[str] = None
     is_active: bool
     created_at: datetime
     

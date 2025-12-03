@@ -32,9 +32,15 @@ def generate_random_password(length: int = 12) -> str:
 @router.get("/", response_model=List[UserResponse])
 async def list_users(
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_admin)
+    current_user: User = Depends(get_current_active_user)
 ):
-    """List all users (Admin only)."""
+    """List all users (Admin and Manager)."""
+    if current_user.role not in [UserRole.ADMIN, UserRole.MANAGER]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only administrators and managers can view users"
+        )
+        
     users = db.query(User).all()
     return [UserResponse.model_validate(user) for user in users]
 

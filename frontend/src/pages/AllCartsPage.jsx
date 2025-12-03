@@ -3,7 +3,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import Button from '../components/Button';
-import { ShoppingCart, CreditCard, User, MapPin } from 'lucide-react';
+import { ShoppingCart, CreditCard, User, MapPin, Search } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const AllCartsPage = () => {
@@ -11,6 +11,7 @@ const AllCartsPage = () => {
     const { user } = useAuth();
     const [selectedCart, setSelectedCart] = useState(null);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
     // Only admins and managers can access this page
     if (user?.role === 'team_member') {
@@ -41,6 +42,15 @@ const AllCartsPage = () => {
             } catch {
                 return [];
             }
+        }
+    });
+
+    // Fetch restaurants for display
+    const { data: restaurants = [] } = useQuery({
+        queryKey: ['restaurants'],
+        queryFn: async () => {
+            const response = await api.get('/restaurants/');
+            return response.data;
         }
     });
 
@@ -79,6 +89,29 @@ const AllCartsPage = () => {
         return u ? u.full_name || u.email : `User #${userId}`;
     };
 
+    const getUserUid = (userId) => {
+        const u = users.find(u => u.id === userId);
+        return u?.user_uid || `ID: ${userId}`;
+    };
+
+    const getRestaurantName = (restaurantId) => {
+        const r = restaurants.find(r => r.id === restaurantId);
+        return r ? r.name : `Restaurant #${restaurantId}`;
+    };
+
+    const filteredCarts = carts.filter(cart => {
+        const searchLower = searchTerm.toLowerCase();
+        const userName = getUserName(cart.user_id).toLowerCase();
+        const userUid = getUserUid(cart.user_id).toLowerCase();
+        const restaurantName = getRestaurantName(cart.restaurant_id).toLowerCase();
+        const orderId = cart.id.toString();
+
+        return userName.includes(searchLower) ||
+               userUid.includes(searchLower) ||
+               restaurantName.includes(searchLower) ||
+               orderId.includes(searchLower);
+    });
+
     const handleCheckout = (cart) => {
         setSelectedCart(cart);
         setShowPaymentModal(true);
@@ -101,17 +134,36 @@ const AllCartsPage = () => {
 
     return (
         <div className="max-w-6xl mx-auto">
-            <h1 className="text-3xl font-bold text-foreground mb-8">All User Carts</h1>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <h1 className="text-3xl font-bold text-foreground">All User Carts</h1>
+                
+                <div className="relative w-full md:w-96">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Search className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <input
+                        type="text"
+                        placeholder="Search by user, ID, or restaurant..."
+                        className="block w-full pl-10 pr-3 py-2 border border-border rounded-lg leading-5 bg-background placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm transition-colors"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+            </div>
 
-            {carts.length === 0 ? (
+            {filteredCarts.length === 0 ? (
                 <div className="text-center py-16 bg-muted/30 rounded-xl">
                     <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h2 className="text-xl font-semibold text-foreground mb-2">No active carts</h2>
-                    <p className="text-muted-foreground">No users currently have items in their cart.</p>
+                    <h2 className="text-xl font-semibold text-foreground mb-2">
+                        {searchTerm ? 'No matching carts found' : 'No active carts'}
+                    </h2>
+                    <p className="text-muted-foreground">
+                        {searchTerm ? 'Try adjusting your search terms.' : 'No users currently have items in their cart.'}
+                    </p>
                 </div>
             ) : (
                 <div className="grid gap-6">
-                    {carts.map((cart) => (
+                    {filteredCarts.map((cart) => (
                         <div key={cart.id} className="bg-white rounded-xl shadow-sm border border-border overflow-hidden">
                             <div className="p-6">
                                 {/* Cart Header */}
@@ -122,7 +174,7 @@ const AllCartsPage = () => {
                                         </div>
                                         <div>
                                             <h3 className="font-semibold text-foreground">{getUserName(cart.user_id)}</h3>
-                                            <p className="text-sm text-muted-foreground">Cart #{cart.id} • Restaurant #{cart.restaurant_id}</p>
+                                            <p className="text-sm text-muted-foreground">{getUserUid(cart.user_id)} • {getRestaurantName(cart.restaurant_id)}</p>
                                         </div>
                                     </div>
                                     <div className="text-right">

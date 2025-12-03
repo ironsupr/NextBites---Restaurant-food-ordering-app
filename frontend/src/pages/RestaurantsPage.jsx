@@ -46,19 +46,19 @@ const RestaurantsPage = () => {
             <section className="relative rounded-3xl overflow-hidden bg-slate-900 text-white shadow-xl">
                 <div className="absolute inset-0">
                     <img 
-                        src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1600&q=80" 
-                        alt="Hero background" 
+                        src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1600&q=80" 
+                        alt="Restaurant dining" 
                         className="w-full h-full object-cover opacity-40"
                     />
                     <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 to-transparent" />
                 </div>
                 <div className="relative z-10 px-8 py-16 md:py-24 max-w-2xl">
                     <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-                        Delicious food,<br />
-                        <span className="text-primary">delivered to you.</span>
+                        Order & Dine,<br />
+                        <span className="text-primary">your way.</span>
                     </h1>
                     <p className="text-lg text-slate-200 mb-8 max-w-lg">
-                        Order from the best local restaurants with easy, on-demand delivery. Fresh, fast, and right to your doorstep.
+                        Browse our menu, place your order ahead, and enjoy your meal without the wait. Dine-in, takeaway, or pickup — you choose.
                     </p>
                     
                     <div className="flex gap-2 max-w-md bg-white/10 backdrop-blur-md p-2 rounded-full border border-white/20">
@@ -66,7 +66,7 @@ const RestaurantsPage = () => {
                             <Search className="h-5 w-5 text-slate-300 mr-3" />
                             <input 
                                 type="text" 
-                                placeholder="Search for restaurants or food..." 
+                                placeholder="Search for dishes or restaurants..." 
                                 className="bg-transparent border-none outline-none text-white placeholder:text-slate-400 w-full"
                             />
                         </div>
@@ -119,7 +119,7 @@ const RestaurantsPage = () => {
                                     />
                                     <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-sm text-foreground">
                                         <Clock className="h-3.5 w-3.5 text-primary" />
-                                        20-30 min
+                                        Open Now
                                     </div>
                                     <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-medium text-white flex items-center gap-1.5">
                                         <MapPin className="h-3.5 w-3.5 text-primary" />
@@ -142,10 +142,10 @@ const RestaurantsPage = () => {
 
                                     <div className="flex items-center justify-between pt-4 border-t border-border/50">
                                         <span className="text-xs font-medium text-muted-foreground bg-secondary px-2.5 py-1 rounded-md">
-                                            $$ • Free Delivery
+                                            $$ • Dine-in & Takeaway
                                         </span>
                                         <span className="text-sm font-medium text-primary flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                                            View Menu <ArrowRight className="h-4 w-4" />
+                                            Order Now <ArrowRight className="h-4 w-4" />
                                         </span>
                                     </div>
                                 </div>

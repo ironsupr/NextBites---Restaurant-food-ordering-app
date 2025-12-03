@@ -32,6 +32,7 @@ ROLE_PERMISSIONS = {
     UserRole.TEAM_MEMBER: [
         Permission.VIEW_MENU,
         Permission.CREATE_ORDER,
+        Permission.CHECKOUT,
     ],
 }
 

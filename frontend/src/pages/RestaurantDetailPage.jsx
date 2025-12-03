@@ -1,14 +1,124 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../utils/api';
 import Button from '../components/Button';
-import { ArrowLeft, Plus, ShoppingCart, Check, Star, MapPin, Clock, Info, ShoppingBag } from 'lucide-react';
+import { ArrowLeft, Plus, Minus, ShoppingCart, Check, Star, MapPin, Clock, Info, ShoppingBag, X } from 'lucide-react';
 import { cn } from '../utils/cn';
+
+// Quantity Selector Modal Component
+const QuantityModal = ({ item, isOpen, onClose, onConfirm, isLoading }) => {
+    const [quantity, setQuantity] = useState(1);
+
+    if (!isOpen || !item) return null;
+
+    const handleConfirm = () => {
+        onConfirm(item, quantity);
+        setQuantity(1); // Reset for next time
+    };
+
+    const handleClose = () => {
+        setQuantity(1);
+        onClose();
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <div 
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                onClick={handleClose}
+            />
+            
+            {/* Modal */}
+            <div className="relative bg-card rounded-2xl shadow-2xl border border-border w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                {/* Item Image */}
+                <div className="relative h-48 overflow-hidden">
+                    <img 
+                        src={item.image_url || `https://source.unsplash.com/400x400/?food,${item.name.replace(' ', '')}`}
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'; }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    <button
+                        onClick={handleClose}
+                        className="absolute top-4 right-4 h-8 w-8 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors"
+                    >
+                        <X className="h-4 w-4" />
+                    </button>
+                    <div className="absolute bottom-4 left-4 right-4">
+                        <h3 className="text-xl font-bold text-white mb-1">{item.name}</h3>
+                        <p className="text-white/80 text-sm line-clamp-2">{item.description}</p>
+                    </div>
+                </div>
+
+                {/* Content */}
+                <div className="p-6">
+                    {/* Price */}
+                    <div className="flex justify-between items-center mb-6">
+                        <span className="text-muted-foreground">Price per item</span>
+                        <span className="text-xl font-bold text-primary">${item.price}</span>
+                    </div>
+
+                    {/* Quantity Selector */}
+                    <div className="flex items-center justify-center gap-6 mb-6 py-4 bg-muted/30 rounded-xl">
+                        <button
+                            onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                            disabled={quantity <= 1}
+                            className="h-12 w-12 rounded-full bg-card border border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <Minus className="h-5 w-5" />
+                        </button>
+                        
+                        <span className="text-4xl font-bold text-foreground w-16 text-center">
+                            {quantity}
+                        </span>
+                        
+                        <button
+                            onClick={() => setQuantity(Math.min(99, quantity + 1))}
+                            disabled={quantity >= 99}
+                            className="h-12 w-12 rounded-full bg-primary text-white flex items-center justify-center hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <Plus className="h-5 w-5" />
+                        </button>
+                    </div>
+
+                    {/* Total */}
+                    <div className="flex justify-between items-center mb-6 pb-4 border-b border-border">
+                        <span className="text-lg font-medium text-foreground">Total</span>
+                        <span className="text-2xl font-bold text-primary">
+                            ${(item.price * quantity).toFixed(2)}
+                        </span>
+                    </div>
+
+                    {/* Add to Cart Button */}
+                    <Button
+                        className="w-full"
+                        size="lg"
+                        onClick={handleConfirm}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? (
+                            'Adding...'
+                        ) : (
+                            <>
+                                <ShoppingCart className="h-5 w-5 mr-2" />
+                                Add {quantity} to Cart
+                            </>
+                        )}
+                    </Button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const RestaurantDetailPage = () => {
     const { id } = useParams();
     const queryClient = useQueryClient();
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Fetch restaurant details
     const { data: restaurant, isLoading: restaurantLoading } = useQuery({
@@ -62,10 +172,17 @@ const RestaurantDetailPage = () => {
         onSuccess: async () => {
             // Refetch cart to update UI
             await refetchCart();
+            setIsModalOpen(false);
+            setSelectedItem(null);
         }
     });
 
-    const handleAddToCart = async (menuItem) => {
+    const openQuantityModal = (menuItem) => {
+        setSelectedItem(menuItem);
+        setIsModalOpen(true);
+    };
+
+    const handleAddToCart = async (menuItem, quantity) => {
         try {
             let orderId = currentCart?.id;
 
@@ -74,7 +191,10 @@ const RestaurantDetailPage = () => {
                 const confirmed = window.confirm(
                     'You have items from another restaurant in your cart. Adding items from this restaurant will clear your current cart. Continue?'
                 );
-                if (!confirmed) return;
+                if (!confirmed) {
+                    setIsModalOpen(false);
+                    return;
+                }
             }
 
             // If no cart exists or cart is for a different restaurant, create new one
@@ -83,11 +203,11 @@ const RestaurantDetailPage = () => {
                 orderId = newOrder.id;
             }
 
-            // Add item to cart
+            // Add item to cart with selected quantity
             await addItemMutation.mutateAsync({
                 orderId: orderId,
                 menuItemId: menuItem.id,
-                quantity: 1
+                quantity: quantity
             });
         } catch (error) {
             console.error('Error adding to cart:', error);
@@ -213,13 +333,11 @@ const RestaurantDetailPage = () => {
                                             )}
                                             <Button 
                                                 size="sm" 
-                                                onClick={() => handleAddToCart(item)}
+                                                onClick={() => openQuantityModal(item)}
                                                 disabled={addItemMutation.isPending}
                                                 className="rounded-full px-6 shadow-sm group-hover:shadow-md transition-all"
                                             >
-                                                {addItemMutation.isPending ? 'Adding...' : (
-                                                    <>Add <Plus className="ml-2 h-4 w-4" /></>
-                                                )}
+                                                Add <Plus className="ml-2 h-4 w-4" />
                                             </Button>
                                         </div>
                                     </div>
@@ -229,6 +347,18 @@ const RestaurantDetailPage = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Quantity Selector Modal */}
+            <QuantityModal
+                item={selectedItem}
+                isOpen={isModalOpen}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setSelectedItem(null);
+                }}
+                onConfirm={handleAddToCart}
+                isLoading={addItemMutation.isPending || createOrderMutation.isPending}
+            />
         </div>
     );
 };

@@ -7,9 +7,23 @@ from app.schemas.user import UserCreate, UserResponse, LoginRequest, TokenRespon
 from app.core.security import create_access_token, blacklist_token
 from app.middleware.auth import get_current_active_user
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+import random
+import string
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 security = HTTPBearer()
+
+
+def generate_user_uid(db: Session) -> str:
+    """Generate a unique user ID like NB-XXXXXX."""
+    chars = string.ascii_uppercase + string.digits
+    while True:
+        random_part = ''.join(random.choices(chars, k=6))
+        uid = f"NB-{random_part}"
+        # Check if uid already exists
+        existing = db.query(User).filter(User.user_uid == uid).first()
+        if not existing:
+            return uid
 
 
 def create_default_payment_method(db: Session, user_id: int):
@@ -36,12 +50,17 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
             detail="Email already registered"
         )
     
+    # Generate unique user ID
+    user_uid = generate_user_uid(db)
+    
     # Create new user
     new_user = User(
         email=user_data.email,
         password_hash=User.hash_password(user_data.password),
         role=user_data.role,  # Defaults to TEAM_MEMBER
-        country=user_data.country
+        country=user_data.country,
+        full_name=user_data.full_name,
+        user_uid=user_uid
     )
     
     db.add(new_user)
