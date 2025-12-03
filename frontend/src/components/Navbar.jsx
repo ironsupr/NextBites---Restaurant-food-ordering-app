@@ -1,15 +1,19 @@
-import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useLocation as useRouterLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { ShoppingBag, ShoppingCart, Menu, X, LogOut, User, Shield, ChevronDown } from 'lucide-react';
+import { useLocation } from '../contexts/LocationContext';
+import { ShoppingBag, ShoppingCart, Menu, X, LogOut, User, Shield, ChevronDown, MapPin, Globe, Check } from 'lucide-react';
 import Button from './Button';
 import { cn } from '../utils/cn';
 
 const Navbar = () => {
     const { user, logout, hasPermission } = useAuth();
-    const location = useLocation();
+    const routerLocation = useRouterLocation();
     const navigate = useNavigate();
-    const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isLocationOpen, setIsLocationOpen] = useState(false);
+    
+    const { selectedLocation, countries, changeLocation, clearLocation, isAdmin, userCountry } = useLocation();
 
     const handleLogout = () => {
         logout();
@@ -42,10 +46,65 @@ const Navbar = () => {
                     </div>
                 </Link>
 
+                {/* Location Selector - Desktop (Admin Only) OR Location Badge (Non-Admin) */}
+                {isAdmin ? (
+                    <div className="hidden md:block relative">
+                        <button
+                            onClick={() => setIsLocationOpen(!isLocationOpen)}
+                            className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border/50 hover:bg-secondary transition-colors"
+                        >
+                            <MapPin className="h-4 w-4 text-primary" />
+                            <span className="text-sm font-medium text-foreground">
+                                {selectedLocation || 'All Locations'}
+                            </span>
+                            <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", isLocationOpen && "rotate-180")} />
+                        </button>
+                        
+                        {isLocationOpen && (
+                            <>
+                                <div className="fixed inset-0 z-40" onClick={() => setIsLocationOpen(false)} />
+                                <div className="absolute top-full mt-2 left-0 w-48 bg-card rounded-xl shadow-lg border border-border z-50 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                                    <button
+                                        onClick={() => { clearLocation(); setIsLocationOpen(false); }}
+                                        className={cn(
+                                            "w-full px-4 py-2.5 text-left text-sm font-medium flex items-center gap-3 hover:bg-secondary transition-colors",
+                                            !selectedLocation && "text-primary"
+                                        )}
+                                    >
+                                        <Globe className="h-4 w-4" />
+                                        All Locations
+                                        {!selectedLocation && <Check className="h-4 w-4 ml-auto" />}
+                                    </button>
+                                    <div className="h-px bg-border my-1" />
+                                    {countries.map((country) => (
+                                        <button
+                                            key={country}
+                                            onClick={() => { changeLocation(country); setIsLocationOpen(false); }}
+                                            className={cn(
+                                                "w-full px-4 py-2.5 text-left text-sm font-medium flex items-center gap-3 hover:bg-secondary transition-colors",
+                                                selectedLocation === country && "text-primary"
+                                            )}
+                                        >
+                                            <MapPin className="h-4 w-4" />
+                                            {country}
+                                            {selectedLocation === country && <Check className="h-4 w-4 ml-auto" />}
+                                        </button>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </div>
+                ) : userCountry ? (
+                    <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
+                        <MapPin className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-medium text-primary">{userCountry}</span>
+                    </div>
+                ) : null}
+
                 {/* Desktop Navigation - Centered Pill Design */}
                 <div className="hidden md:flex items-center bg-secondary/50 p-1.5 rounded-full border border-border/50 backdrop-blur-sm">
                     {navLinks.filter(link => link.show).map((link) => {
-                        const isActive = location.pathname === link.path;
+                        const isActive = routerLocation.pathname === link.path;
                         return (
                             <Link
                                 key={link.path}
@@ -114,6 +173,52 @@ const Navbar = () => {
             {isMenuOpen && (
                 <div className="md:hidden border-t border-border/50 bg-background/95 backdrop-blur-xl animate-in slide-in-from-top-5 duration-200">
                     <div className="px-4 pt-4 pb-6 space-y-2">
+                        {/* Mobile Location - Admin gets selector, others get badge */}
+                        {isAdmin ? (
+                            <div className="mb-4 pb-4 border-b border-border/50">
+                                <p className="text-xs font-medium text-muted-foreground mb-2 px-4">SELECT LOCATION</p>
+                                <div className="flex flex-wrap gap-2 px-4">
+                                    <button
+                                        onClick={() => { clearLocation(); }}
+                                        className={cn(
+                                            "px-3 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5",
+                                            !selectedLocation 
+                                                ? "bg-primary text-primary-foreground" 
+                                                : "bg-secondary text-foreground hover:bg-secondary/80"
+                                        )}
+                                    >
+                                        <Globe className="h-3.5 w-3.5" />
+                                        All
+                                    </button>
+                                    {countries.map((country) => (
+                                        <button
+                                            key={country}
+                                            onClick={() => { changeLocation(country); }}
+                                            className={cn(
+                                                "px-3 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5",
+                                                selectedLocation === country 
+                                                    ? "bg-primary text-primary-foreground" 
+                                                    : "bg-secondary text-foreground hover:bg-secondary/80"
+                                            )}
+                                        >
+                                            <MapPin className="h-3.5 w-3.5" />
+                                            {country}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : userCountry ? (
+                            <div className="mb-4 pb-4 border-b border-border/50">
+                                <p className="text-xs font-medium text-muted-foreground mb-2 px-4">YOUR LOCATION</p>
+                                <div className="px-4">
+                                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
+                                        <MapPin className="h-4 w-4 text-primary" />
+                                        <span className="text-sm font-medium text-primary">{userCountry}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : null}
+                        
                         {navLinks.filter(link => link.show).map((link) => (
                             <Link
                                 key={link.path}
@@ -121,7 +226,7 @@ const Navbar = () => {
                                 onClick={() => setIsMenuOpen(false)}
                                 className={cn(
                                     "flex items-center px-4 py-3 rounded-xl text-base font-medium transition-all",
-                                    location.pathname === link.path
+                                    routerLocation.pathname === link.path
                                         ? "bg-primary/10 text-primary"
                                         : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                                 )}

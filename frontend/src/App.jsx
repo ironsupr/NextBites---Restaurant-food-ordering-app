@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
+import { LocationProvider } from './contexts/LocationContext';
 import Layout, { ProtectedRoute } from './components/Layout';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -21,36 +22,38 @@ function App() {
         <QueryClientProvider client={queryClient}>
             <BrowserRouter>
                 <AuthProvider>
-                    <Routes>
-                        {/* Public Routes */}
-                        <Route path="/login" element={<LoginPage />} />
-                        <Route path="/register" element={<RegisterPage />} />
+                    <LocationProvider>
+                        <Routes>
+                            {/* Public Routes */}
+                            <Route path="/login" element={<LoginPage />} />
+                            <Route path="/register" element={<RegisterPage />} />
 
-                        {/* Protected Routes */}
-                        <Route element={<Layout />}>
-                            <Route path="/" element={<Navigate to="/restaurants" replace />} />
-                            <Route path="/restaurants" element={<RestaurantsPage />} />
-                            <Route path="/restaurants/:id" element={<RestaurantDetailPage />} />
+                            {/* Protected Routes */}
+                            <Route element={<Layout />}>
+                                <Route path="/" element={<Navigate to="/restaurants" replace />} />
+                                <Route path="/restaurants" element={<RestaurantsPage />} />
+                                <Route path="/restaurants/:id" element={<RestaurantDetailPage />} />
 
-                            <Route element={<ProtectedRoute />}>
-                                <Route path="/orders" element={<OrdersPage />} />
-                                <Route path="/cart" element={<CartPage />} />
-                                <Route path="/checkout/:orderId" element={<CheckoutPage />} />
+                                <Route element={<ProtectedRoute />}>
+                                    <Route path="/orders" element={<OrdersPage />} />
+                                    <Route path="/cart" element={<CartPage />} />
+                                    <Route path="/checkout/:orderId" element={<CheckoutPage />} />
+                                </Route>
+
+                                <Route element={<ProtectedRoute requiredPermission="checkout" />}>
+                                    <Route path="/admin/carts" element={<AllCartsPage />} />
+                                </Route>
+
+                                <Route element={<ProtectedRoute requiredPermission="manage_users" />}>
+                                    <Route path="/admin/users" element={<UserManagementPage />} />
+                                </Route>
+
+                                <Route element={<ProtectedRoute requiredPermission="update_payment" />}>
+                                    <Route path="/admin/payments" element={<PaymentMethodsPage />} />
+                                </Route>
                             </Route>
-
-                            <Route element={<ProtectedRoute requiredPermission="checkout" />}>
-                                <Route path="/admin/carts" element={<AllCartsPage />} />
-                            </Route>
-
-                            <Route element={<ProtectedRoute requiredPermission="manage_users" />}>
-                                <Route path="/admin/users" element={<UserManagementPage />} />
-                            </Route>
-
-                            <Route element={<ProtectedRoute requiredPermission="update_payment" />}>
-                                <Route path="/admin/payments" element={<PaymentMethodsPage />} />
-                            </Route>
-                        </Route>
-                    </Routes>
+                        </Routes>
+                    </LocationProvider>
                 </AuthProvider>
             </BrowserRouter>
         </QueryClientProvider>

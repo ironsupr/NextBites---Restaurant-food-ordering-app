@@ -5,7 +5,7 @@ import secrets
 import string
 from app.db.database import get_db
 from app.models.user import User, UserRole
-from app.schemas.user import UserResponse, UserCreateByAdmin, UserRoleUpdate
+from app.schemas.user import UserResponse, UserCreateByAdmin, UserRoleUpdate, UserUpdate
 from app.middleware.auth import get_current_active_user
 from app.services.email import send_new_user_credentials_email
 
@@ -128,6 +128,63 @@ async def update_user_role(
         )
     
     user.role = role_update.role
+    db.commit()
+    db.refresh(user)
+    
+    return UserResponse.model_validate(user)
+
+
+@router.patch("/{user_id}/country", response_model=UserResponse)
+async def update_user_country(
+    user_id: int,
+    country: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    """Update user's assigned country/location (Admin only)."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    user.country = country
+    db.commit()
+    db.refresh(user)
+    
+    return UserResponse.model_validate(user)
+
+
+@router.patch("/{user_id}", response_model=UserResponse)
+async def update_user(
+    user_id: int,
+    user_update: UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
+    """Update user details including role and country (Admin only)."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    # Prevent admin from demoting themselves
+    if user.id == current_user.id and user_update.role and user_update.role != UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot demote your own admin account"
+        )
+    
+    if user_update.role is not None:
+        user.role = user_update.role
+    if user_update.country is not None:
+        user.country = user_update.country
+    if user_update.is_active is not None:
+        user.is_active = user_update.is_active
+    
     db.commit()
     db.refresh(user)
     

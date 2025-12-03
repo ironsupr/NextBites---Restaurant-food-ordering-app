@@ -2,15 +2,21 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
-import { MapPin, ArrowRight, Search, Star, Clock } from 'lucide-react';
+import { MapPin, ArrowRight, Search, Star, Clock, Globe } from 'lucide-react';
 import Button from '../components/Button';
 import Input from '../components/Input';
+import { useLocation } from '../contexts/LocationContext';
 
 const RestaurantsPage = () => {
+    const { selectedLocation, effectiveLocation, isAdmin } = useLocation();
+    
+    // For admins, use selectedLocation to filter. For others, backend auto-filters by their country
     const { data: restaurants, isLoading, error } = useQuery({
-        queryKey: ['restaurants'],
+        queryKey: ['restaurants', selectedLocation],
         queryFn: async () => {
-            const response = await api.get('/restaurants/');
+            // Only admins can pass the country filter
+            const params = isAdmin && selectedLocation ? `?country=${encodeURIComponent(selectedLocation)}` : '';
+            const response = await api.get(`/restaurants/${params}`);
             return response.data;
         },
     });
@@ -53,6 +59,18 @@ const RestaurantsPage = () => {
                     <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 to-transparent" />
                 </div>
                 <div className="relative z-10 px-8 py-16 md:py-24 max-w-2xl">
+                    {effectiveLocation && (
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/20 backdrop-blur-md rounded-full text-primary text-sm font-medium mb-4 border border-primary/30">
+                            <MapPin className="h-4 w-4" />
+                            {isAdmin ? `Viewing: ${effectiveLocation}` : `Your location: ${effectiveLocation}`}
+                        </div>
+                    )}
+                    {isAdmin && !selectedLocation && (
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-full text-white text-sm font-medium mb-4 border border-white/30">
+                            <Globe className="h-4 w-4" />
+                            Viewing all locations
+                        </div>
+                    )}
                     <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
                         Order & Dine,<br />
                         <span className="text-primary">your way.</span>
@@ -104,10 +122,29 @@ const RestaurantsPage = () => {
             {/* Restaurants Grid */}
             <section>
                 <div className="flex justify-between items-end mb-6">
-                    <h2 className="text-2xl font-bold text-foreground">Popular Restaurants</h2>
+                    <div>
+                        <h2 className="text-2xl font-bold text-foreground">
+                            {effectiveLocation ? `Restaurants in ${effectiveLocation}` : 'All Restaurants'}
+                        </h2>
+                        <p className="text-sm text-muted-foreground mt-1">
+                            {restaurants?.length || 0} restaurant{restaurants?.length !== 1 ? 's' : ''} available
+                        </p>
+                    </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {restaurants?.length === 0 ? (
+                    <div className="text-center py-16 bg-muted/30 rounded-2xl">
+                        <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                        <h3 className="text-xl font-semibold text-foreground mb-2">No restaurants found</h3>
+                        <p className="text-muted-foreground">
+                            {effectiveLocation 
+                                ? `No restaurants available in ${effectiveLocation} at the moment.`
+                                : 'No restaurants available at the moment.'
+                            }
+                        </p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {restaurants?.map((restaurant) => (
                         <Link key={restaurant.id} to={`/restaurants/${restaurant.id}`} className="group block">
                             <div className="bg-card rounded-2xl border border-border overflow-hidden hover:shadow-lg transition-all duration-300 h-full flex flex-col">
@@ -152,7 +189,8 @@ const RestaurantsPage = () => {
                             </div>
                         </Link>
                     ))}
-                </div>
+                    </div>
+                )}
             </section>
         </div>
     );

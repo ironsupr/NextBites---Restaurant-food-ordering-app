@@ -92,11 +92,14 @@ The frontend is a React application built with Vite and Tailwind CSS.
 
 The database initialization script creates the following accounts for testing:
 
-| Role | Email | Password | Permissions |
-|------|-------|----------|-------------|
-| **Admin** | `admin@nextbite.com` | `Admin@123` | Full access (Users, Payments, Restaurants) |
-| **Manager** | `captain.marvel@nextbite.com` | `Marvel@123` | Manage Orders, Checkout |
-| **User** | `thanos@nextbite.com` | `Thanos@123` | Browse, Cart, Order |
+| # | Email | Password | Role | Country | Permissions |
+|---|-------|----------|------|---------|-------------|
+| 1 | `nick.fury@nextbite.com` | `Fury@123` | **Admin** | USA | Full access - Manage users, payments, restaurants, orders |
+| 2 | `captain.marvel@nextbite.com` | `Marvel@123` | **Manager** | India | Checkout orders, Cancel orders, View all carts |
+| 3 | `captain.america@nextbite.com` | `America@123` | **Manager** | USA | Checkout orders, Cancel orders, View all carts |
+| 4 | `thanos@nextbite.com` | `Thanos@123` | **Team Member** | India | Browse restaurants, Create orders, Checkout own orders |
+| 5 | `thor@nextbite.com` | `Thor@123` | **Team Member** | India | Browse restaurants, Create orders, Checkout own orders |
+| 6 | `travis@nextbite.com` | `Travis@123` | **Team Member** | USA | Browse restaurants, Create orders, Checkout own orders |
 
 ---
 

@@ -19,6 +19,14 @@ const UserManagementPage = () => {
         },
     });
 
+    const { data: countries = [] } = useQuery({
+        queryKey: ['countries'],
+        queryFn: async () => {
+            const response = await api.get('/restaurants/countries');
+            return response.data;
+        },
+    });
+
     const createUserMutation = useMutation({
         mutationFn: async (userData) => {
             await api.post('/users/', userData);
@@ -36,6 +44,15 @@ const UserManagementPage = () => {
     const updateUserRoleMutation = useMutation({
         mutationFn: async ({ userId, role }) => {
             await api.patch(`/users/${userId}`, { role });
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries(['users']);
+        },
+    });
+
+    const updateUserCountryMutation = useMutation({
+        mutationFn: async ({ userId, country }) => {
+            await api.patch(`/users/${userId}`, { country });
         },
         onSuccess: () => {
             queryClient.invalidateQueries(['users']);
@@ -71,7 +88,6 @@ const UserManagementPage = () => {
                                 <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Role</th>
                                 <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Country</th>
                                 <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -89,36 +105,32 @@ const UserManagementPage = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                      ${user.role === 'admin' ? 'bg-purple-100 text-purple-700' :
-                                                user.role === 'manager' ? 'bg-blue-100 text-blue-700' :
-                                                    'bg-muted text-gray-700'}`}>
-                                            {user.role === 'admin' && <Shield className="h-3 w-3 mr-1" />}
-                                            {user.role.replace('_', ' ')}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-muted-foreground">
-                                        <div className="flex items-center gap-1.5">
-                                            <MapPin className="h-3 w-3 text-muted-foreground" />
-                                            {user.country}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${user.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
-                                            {user.is_active ? 'Active' : 'Inactive'}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4">
                                         <select
-                                            className="text-sm border-border rounded-md focus:ring-primary focus:border-primary"
+                                            className="text-sm border border-border rounded-md px-2 py-1 focus:ring-primary focus:border-primary"
                                             value={user.role}
                                             onChange={(e) => updateUserRoleMutation.mutate({ userId: user.id, role: e.target.value })}
-                                            disabled={user.role === 'admin' && user.email === 'admin@nextbite.com'} // Prevent changing root admin
+                                            disabled={user.role === 'admin' && user.email === 'admin@nextbite.com'}
                                         >
                                             <option value="team_member">Team Member</option>
                                             <option value="manager">Manager</option>
                                             <option value="admin">Admin</option>
                                         </select>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <select
+                                            className="text-sm border border-border rounded-md px-2 py-1 focus:ring-primary focus:border-primary"
+                                            value={user.country}
+                                            onChange={(e) => updateUserCountryMutation.mutate({ userId: user.id, country: e.target.value })}
+                                        >
+                                            {countries.map((country) => (
+                                                <option key={country} value={country}>{country}</option>
+                                            ))}
+                                        </select>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${user.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                                            {user.is_active ? 'Active' : 'Inactive'}
+                                        </span>
                                     </td>
                                 </tr>
                             ))}
