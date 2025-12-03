@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import Button from '../components/Button';
-import { ShoppingCart, CreditCard, User, MapPin, Search } from 'lucide-react';
+import { ShoppingCart, CreditCard, User, MapPin, Search, Trash2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const AllCartsPage = () => {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const queryClient = useQueryClient();
+    const { user, hasPermission } = useAuth();
     const [selectedCart, setSelectedCart] = useState(null);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const canCancel = hasPermission('cancel_order');
 
     // Only admins and managers can access this page
     if (user?.role === 'team_member') {
@@ -81,6 +83,20 @@ const AllCartsPage = () => {
         },
         onError: (error) => {
             alert(`Checkout failed: ${error.response?.data?.detail || error.message}`);
+        }
+    });
+
+    // Cancel cart mutation
+    const cancelCartMutation = useMutation({
+        mutationFn: async (orderId) => {
+            await api.delete(`/orders/${orderId}`);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries(['allCarts']);
+            refetch();
+        },
+        onError: (error) => {
+            alert(`Cancel failed: ${error.response?.data?.detail || error.message}`);
         }
     });
 
@@ -198,7 +214,18 @@ const AllCartsPage = () => {
                                 </div>
 
                                 {/* Actions */}
-                                <div className="flex justify-end">
+                                <div className="flex justify-end gap-3">
+                                    {canCancel && (
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => cancelCartMutation.mutate(cart.id)}
+                                            disabled={cancelCartMutation.isPending}
+                                            className="flex items-center gap-2 text-rose-600 border-rose-200 hover:bg-rose-50"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                            Cancel Cart
+                                        </Button>
+                                    )}
                                     <Button onClick={() => handleCheckout(cart)} className="flex items-center gap-2">
                                         <CreditCard className="h-4 w-4" />
                                         Checkout for User

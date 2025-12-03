@@ -7,15 +7,15 @@ import Button from '../components/Button';
 
 const OrdersPage = () => {
     const queryClient = useQueryClient();
-    const { hasPermission } = useAuth();
+    const { hasPermission, user } = useAuth();
     const canCancel = hasPermission('cancel_order');
 
     const { data: orders, isLoading } = useQuery({
         queryKey: ['orders'],
         queryFn: async () => {
             const response = await api.get('/orders/');
-            // Filter out 'cart' status orders
-            return response.data.filter(o => o.status !== 'cart').sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            // Show all orders including cart
+            return response.data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         },
     });
 
@@ -48,8 +48,8 @@ const OrdersPage = () => {
     };
 
     const canCancelOrder = (order) => {
-        // Can only cancel pending orders and if user has permission
-        return canCancel && order.status === 'pending';
+        // Can cancel cart or pending orders if user has permission
+        return canCancel && (order.status === 'cart' || order.status === 'pending');
     };
 
     if (isLoading) {

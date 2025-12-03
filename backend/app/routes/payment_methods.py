@@ -94,9 +94,9 @@ async def list_payment_methods(
 async def create_payment_method(
     payment_data: PaymentMethodCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_admin)
 ):
-    """Create a new payment method."""
+    """Create a new payment method (Admin only)."""
     from app.models.user import User as UserModel
     
     # Admin logic for creating for other users
@@ -171,9 +171,9 @@ async def update_payment_method(
     payment_method_id: int,
     payment_data: PaymentMethodCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_admin)
 ):
-    """Update payment method."""
+    """Update payment method (Admin only)."""
     payment_method = db.query(PaymentMethod).filter(
         PaymentMethod.id == payment_method_id
     ).first()
@@ -182,13 +182,6 @@ async def update_payment_method(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Payment method not found"
-        )
-        
-    # Check permissions
-    if payment_method.user_id != current_user.id and current_user.role != UserRole.ADMIN:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized to update this payment method"
         )
     
     # If setting as default, unset other defaults
@@ -213,9 +206,9 @@ async def update_payment_method(
 async def delete_payment_method(
     payment_method_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_admin)
 ):
-    """Delete payment method."""
+    """Delete payment method (Admin only)."""
     payment_method = db.query(PaymentMethod).filter(
         PaymentMethod.id == payment_method_id
     ).first()
@@ -224,13 +217,6 @@ async def delete_payment_method(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Payment method not found"
-        )
-        
-    # Check permissions
-    if payment_method.user_id != current_user.id and current_user.role != UserRole.ADMIN:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized to delete this payment method"
         )
     
     db.delete(payment_method)

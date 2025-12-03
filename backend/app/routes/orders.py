@@ -450,7 +450,7 @@ async def cancel_order(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """Cancel order - ADMIN and MANAGER only."""
+    """Cancel order - ADMIN and MANAGER can cancel any order."""
     check_permission(current_user, Permission.CANCEL_ORDER)
     
     order = db.query(Order).filter(Order.id == order_id).first()
@@ -460,11 +460,8 @@ async def cancel_order(
             detail="Order not found"
         )
     
-    if order.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You can only cancel your own orders"
-        )
+    # Admin and Manager can cancel any order (no ownership check needed)
+    # Permission check above already ensures only Admin/Manager can reach here
     
     if order.status == OrderStatus.CANCELLED:
         raise HTTPException(
