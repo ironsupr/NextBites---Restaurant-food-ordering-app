@@ -27,19 +27,13 @@ const RestaurantDetailPage = () => {
         }
     });
 
-    // Fetch current cart to check what's already there
+    // Fetch current cart
     const { data: currentCart, refetch: refetchCart } = useQuery({
         queryKey: ['cart'],
         queryFn: async () => {
             const response = await api.get('/orders/');
-            // Get carts and find the one for current restaurant, or the most recent one with items
-            const carts = response.data.filter(o => o.status === 'cart');
-            // Prefer cart for current restaurant
-            const restaurantCart = carts.find(c => c.restaurant_id === parseInt(id));
-            if (restaurantCart) return restaurantCart;
-            // Otherwise get the most recent cart with items
-            const cartsWithItems = carts.filter(c => c.order_items && c.order_items.length > 0);
-            return cartsWithItems[cartsWithItems.length - 1] || carts[carts.length - 1] || null;
+            // User can only have one cart
+            return response.data.find(o => o.status === 'cart') || null;
         },
         staleTime: 0
     });
@@ -74,25 +68,28 @@ const RestaurantDetailPage = () => {
         try {
             let orderId = currentCart?.id;
 
+            // If cart is for a different restaurant, confirm before clearing
+            if (currentCart && currentCart.restaurant_id !== parseInt(id)) {
+                const confirmed = window.confirm(
+                    'You have items from another restaurant in your cart. Adding items from this restaurant will clear your current cart. Continue?'
+                );
+                if (!confirmed) return;
+            }
+
             // If no cart exists or cart is for a different restaurant, create new one
             if (!orderId || (currentCart && currentCart.restaurant_id !== parseInt(id))) {
-                console.log('Creating new order for restaurant:', id);
                 const newOrder = await createOrderMutation.mutateAsync(parseInt(id));
                 orderId = newOrder.id;
-                console.log('Created order:', orderId);
             }
 
             // Add item to cart
-            console.log('Adding item to cart:', { orderId, menuItemId: menuItem.id });
             await addItemMutation.mutateAsync({
                 orderId: orderId,
                 menuItemId: menuItem.id,
                 quantity: 1
             });
-            console.log('Item added successfully');
         } catch (error) {
             console.error('Error adding to cart:', error);
-            console.error('Error response:', error.response?.data);
             alert(`Failed to add item to cart: ${error.response?.data?.detail || error.message}`);
         }
     };

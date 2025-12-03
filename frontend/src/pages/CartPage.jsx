@@ -13,16 +13,12 @@ const CartPage = () => {
     // Check if user can checkout (Admin and Manager only)
     const canCheckout = hasPermission('checkout');
 
-    // Fetch current cart (pending order)
+    // Fetch current cart (user can only have one)
     const { data: cart, isLoading, refetch: refetchCart } = useQuery({
         queryKey: ['cart'],
         queryFn: async () => {
             const response = await api.get('/orders/');
-            // Get all carts and find the most recent one with items
-            const carts = response.data.filter(o => o.status === 'cart');
-            const cartsWithItems = carts.filter(c => c.order_items && c.order_items.length > 0);
-            // Return the most recent cart with items, or null if none
-            return cartsWithItems[cartsWithItems.length - 1] || null;
+            return response.data.find(o => o.status === 'cart') || null;
         },
         staleTime: 0,
         refetchOnMount: true

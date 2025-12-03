@@ -44,6 +44,22 @@ async def create_order(
             detail="Restaurant not found"
         )
     
+    # Check if user already has a cart
+    existing_cart = db.query(Order).filter(
+        Order.user_id == current_user.id,
+        Order.status == OrderStatus.CART
+    ).first()
+    
+    if existing_cart:
+        # If cart is for the same restaurant, return it
+        if existing_cart.restaurant_id == order_data.restaurant_id:
+            return OrderResponse.model_validate(existing_cart)
+        
+        # If cart is for a different restaurant, delete the old cart and its items
+        db.query(OrderItem).filter(OrderItem.order_id == existing_cart.id).delete()
+        db.delete(existing_cart)
+        db.commit()
+    
     # Create new order in CART status
     new_order = Order(
         user_id=current_user.id,
