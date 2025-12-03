@@ -1,19 +1,18 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.core.config import settings
 from app.routes import auth, users, restaurants, orders, payment_methods
+from app.core.config import settings
 
-# Create FastAPI app
 app = FastAPI(
-    title="NextBite API",
-    description="Food ordering platform with Role-Based Access Control",
+    title=settings.APP_NAME,
+    description="Backend for NextBite Food Ordering Platform",
     version="1.0.0"
 )
 
-# CORS middleware
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL, "http://localhost:5173", "http://localhost:3000"],
+    allow_origins=["http://localhost:5173", "http://localhost:5174", settings.FRONTEND_URL],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
